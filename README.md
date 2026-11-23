@@ -1,5 +1,7 @@
 # 将棋 (shogi.ow) — Ubuntu Touch 将棋アプリ / Shogi client
 
+**Get it on the OpenStore / OpenStore で入手:** <https://open-store.io/app/shogi.ow>
+
 A Shogi (Japanese chess) client for Ubuntu Touch. It bundles the USI engine
 YaneuraOu 9.96git and offers three play strengths (YaneuraOu Material,
 Suisho5, and the stronger MIT-licensed TuyouraOu11-mini), plus a two-player

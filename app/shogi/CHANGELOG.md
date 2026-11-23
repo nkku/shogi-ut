@@ -14,7 +14,8 @@
   (content_exchange=取り込み側 / content_exchange_source=提供側 のDBus通信許可。
   gallery.ubportsと同じ構成。これが無いと `com.lomiri.content.dbus.Service` 呼びが
   apparmor DENIED になる) `clickable review` は **pass** を返す。
-- 実機で書き出し (ファイルマネージャ保存)・読み込みのピア選択UIを動作確認中。
+- 実機で書き出し (ファイルマネージャ保存)・読み込みのピア選択UIとも動作確認済み。
+- **OpenStoreへ提出・公開完了**: <https://open-store.io/app/shogi.ow> (v1.0.0 arm64、自動審査pass)。
 
 ## 2026-11-23 — つようら王11mini の同梱 (CPU棋力強化)
 

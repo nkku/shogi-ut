@@ -2,6 +2,8 @@
 
 USIエンジン対応の将棋クライアント (Ubuntu Touch / Click パッケージ)
 
+OpenStore: <https://open-store.io/app/shogi.ow>
+
 A Shogi (Japanese chess) client for Ubuntu Touch, with bundled USI engines
 (YaneuraOu 9.96git / Suisho5 / TuyouraOu11-mini) for CPU play and a
 two-player hotseat mode.
