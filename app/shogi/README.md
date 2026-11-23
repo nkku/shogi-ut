@@ -6,6 +6,13 @@ A Shogi (Japanese chess) client for Ubuntu Touch, with bundled USI engines
 (YaneuraOu 9.96git / Suisho5 / TuyouraOu11-mini) for CPU play and a
 two-player hotseat mode.
 
+Note: engine strength depends on device performance. On phones, the bundled
+Suisho5 engine is CPU-limited and plays around amateur dan level in 30s
+byo-yomi; TuyouraOu11-mini is significantly stronger on the same hardware.
+
+注意: 端末のCPU性能によりエンジンの実力が変わります。スマートフォンの場合、
+秒読み30秒では水匠5は初段〜二段程度、つようら王11miniが同条件で最も強いです。
+
 ## 同梱エンジンとライセンス
 
 - 本アプリ本体: MIT License (LICENSE 参照)

@@ -9,6 +9,9 @@ repetition), study mode with an evaluation graph and best-move hints,
 KIF/SFEN game export/import and piece sounds. Source code for this app and
 its bundled engines is in this repository.
 
+Note: on phone-class hardware, Suisho5 is CPU-limited (roughly amateur dan
+level at 30s byo-yomi). TuyouraOu11-mini is the strongest choice on-device.
+
 Ubuntu Touch (Clickable / Click パッケージ) 向けの将棋アプリ。
 同梱の USI エンジン (やねうら王 9.96git) と CPU 対戦、および 2 人对局ができます。
 
