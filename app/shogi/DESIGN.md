@@ -163,16 +163,26 @@ kind: 0歩 1香 2桂 3銀 4金 5角 6飛 7玉。
 - from不明手 (KIFの座標なし・from表記欠落) は `?to+駒文字` 形式にし、**`Game::importKifu` が合法手スキャンで解決**
   (駒種+成り+目的地が一致する合法手)。着手元がある手も成り/不成を厳密に照合し、
   打ちは指定した持駒の種類を照合する。不正な指定を別の合法手に置き換えない。
-- 保存先=**Downloads** (`~/Downloads/shogi-<yyyyMMdd-HHmmss>.kif|.sfen`)。`Game::saveKif/saveSfen/listKifuFiles/importKifu`、
-  読み込みは二面打ちとして注入 (engine stop→engineColor_=-1→setupGame→startSfen_→全手applyMove。
+- 書き出し=**content-hub転送**。`Game::saveKif/saveSfen` はアプリ専用領域
+  (`~/.local/share/shogi.ow/exports/shogi-<yyyyMMdd-HHmmss>.kif|.sfen`) にステージングし、
+  QML側が `Lomiri.Content 1.3` の `ContentPeerPicker{handler: ContentHandler.Destination,
+  contentType: ContentType.Documents}` で宛先(ファイルマネージャの「保存」ハンドラ等)を選ばせ、
+  `peer.request()→items=[ContentItem{url}]→state=Charged` で転送。7日古いステージングファイルは自動掃除。
+  読み込みは `ContentHandler.Source` の picker → `Charged` で受領ファイルのパスを得て `Game::importKifu(path,...)`、
+  二面打ちとして注入 (engine stop→engineColor_=-1→setupGame→startSfen_→全手applyMove。
   詰み/千日手を含む棋譜は復現中にそこまで進めて终局表示)。UIはツールバー「棋譜」→ kifuDialog。
-- **apparmorのDownloadsアクセス**: UT 24.04 (`policy_version 2404.1`) に policy_group **`download` は存在しない**
-  (click-review が `security:policy_groups_valid` で弾く)。正攻法は apparmor.json の **`read_path`/`write_path`**
-  (相対パス不可、絶対パス。`/home/phablet/Downloads/**`)。review は `redflag_fields` 警告(NEEDS REVIEW)になるため
-  ローカルビルドは `clickable build --arch arm64 --skip-review` を使う (install自体はredflagでも通る)。
-  インストール時に `/var/lib/apparmor/clicks/shogi.ow_shogi_1.0.0.json` へ反映され、
-  `apparmor/click.py` が read/write_path を込みのプロファイルを再生成することを実機probeで確認済み
-  (設定ファイル経由で発火する書込probe → `Downloads/shogi-write-probe.txt` 生成 OK)。
+- **apparmorはファイルパスを持たせない (OpenStore自動審査対応)**: `read_path`/`write_path` を入れると
+  click-review が `security:redflag_fields` (NEEDS REVIEW) で弾き、手動審査行きとなる
+  (しかも手動審査は2026-11-02付けで一時停止中、OpenStore admin pinned message)。
+  標準の content exchange (lomiri-content-hub、DBus `com.lomiri.content.dbus.Service`) 経由なら
+  自動審査 `pass` となる。必要なのは policy_group **`content_exchange`** (取り込み側: handler bind、
+  `/transfers/@APP_ID/import/*`、Service iface全面) と **`content_exchange_source`** (提供側:
+  `/transfers/@APP_ID/export/*`) で、gallery.ubports の apparmor.json が手本。
+  既定のプロファイルには pasteboard 用メンバー (CreatePaste等) しか無く、グループ追加なしだと
+  `HandlerActive` 呼びが DENIED される (2026-11-23 実測)。
+  UT 24.04 に policy_group `download` は存在しないので直接Downloads読み書きは原理的に不可能だったわけだが。
+  ピア選択UIは `Lomiri/Content/ContentPeerPicker13.qml` (Lomiri.Components 依存)。
+  転送中 ContentTransfer を QML GC から守るため `activeTransfer` プロパティに参照を保持する。
 - **QSettingsの罠**: INI形式では `[General]` セクションは**ルートグループ**にマップされ、
   C++から `value("General/key")` は空になる (`value("key")` が正しい)。
   また QML `Qt.labs.settings` は `~/.config/<appname>/<appname>.conf` (applicationName=shogi.ow) に書くが、

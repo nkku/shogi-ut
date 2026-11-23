@@ -1,5 +1,21 @@
 # 変更履歴
 
+## 2026-11-23 — 棋譜の書き出し/読み込みを content-hub 方式へ (OpenStore自動審査対応)
+
+- OpenStoreの手動審査は **2026-11-02 付けで新規受付が一時停止** されている (admin pinned) ため、
+  自動審査で通る構成に切り替えた。click-review は apparmor の `read_path`/`write_path` を
+  `security:redflag_fields` (FAIL) と判定するため、Downloads直接読み書きを廃止。
+- 書き出し: KIF/SFENをアプリ専用領域 (`~/.local/share/shogi.ow/exports/`) にステージングし、
+  Lomiri.Content (`ContentPeerPicker` / `ContentHandler.Destination`) で
+  「ファイルマネージャに保存」等の標準ダイアログから保存先を選べるようにした。
+- 読み込み: `ContentHandler.Source` のピア選択で *.kif/*.sfen を選ぶ方式に統一
+  (従来のDownloads一覧リストは廃止、`Game::listKifuFiles` も削除)。
+- apparmor は `policy_groups: ["audio", "content_exchange", "content_exchange_source"]` のみに。
+  (content_exchange=取り込み側 / content_exchange_source=提供側 のDBus通信許可。
+  gallery.ubportsと同じ構成。これが無いと `com.lomiri.content.dbus.Service` 呼びが
+  apparmor DENIED になる) `clickable review` は **pass** を返す。
+- 実機で書き出し (ファイルマネージャ保存)・読み込みのピア選択UIを動作確認中。
+
 ## 2026-11-23 — つようら王11mini の同梱 (CPU棋力強化)
 
 - CPU戦の棋力不足への対策として、同梱エンジンに **つようら王11mini** を追加した。

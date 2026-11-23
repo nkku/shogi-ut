@@ -6,6 +6,7 @@
 #include <QFileInfo>
 #include <QProcessEnvironment>
 #include <QDir>
+#include <QStandardPaths>
 #include <QSysInfo>
 #include <QTextStream>
 
@@ -213,15 +214,20 @@ QString Game::enginePathOrDefault(const QString& path, const QString& engineId) 
 }
 
 // --- 棋譜の保存・読込 ---------------------------------------------------------
+// 保存はアプリ専用データ領域 (content-hub が読める場所) にステージングし、
+// content-hub の「書き出し先を選択」UI経由でユーザーの選びた場所に渡す。
+// (直接 Downloads へ書くと apparmor の read/write_path が自動審査を通らない)
 
 namespace {
-QDir downloadsDir()
+QDir exportStagingDir()
 {
-    QDir d(QDir::homePath());
-    if (!d.cd(QStringLiteral("Downloads"))) {
-        d.mkpath(QStringLiteral("Downloads"));
-        d.cd(QStringLiteral("Downloads"));
-    }
+    QDir d(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
+    d.mkpath(QStringLiteral("exports"));
+    d.cd(QStringLiteral("exports"));
+    // 1週間より古いステージングファイルは掃除する
+    for (const QFileInfo& fi : d.entryInfoList(QDir::Files))
+        if (fi.lastModified().daysTo(QDateTime::currentDateTime()) > 7)
+            QFile::remove(fi.absoluteFilePath());
     return d;
 }
 } // namespace
@@ -250,7 +256,7 @@ QString Game::saveKif()
     const QString endText = over_ ? resultText_ : QStringLiteral("中断");
     const QString text = kifu::exportKif(start, usiMoves_, sName, gName, endText);
 
-    const QString path = downloadsDir().absoluteFilePath(
+    const QString path = exportStagingDir().absoluteFilePath(
         QStringLiteral("shogi-%1.kif")
             .arg(QDateTime::currentDateTime().toString(QStringLiteral("yyyyMMdd-HHmmss"))));
     QFile f(path);
@@ -262,13 +268,13 @@ QString Game::saveKif()
     ts.setCodec("UTF-8");
     ts << text;
     f.close();
-    setKifuMessage(QStringLiteral("保存しました: ") + path);
+    setKifuMessage(QString());
     return path;
 }
 
 QString Game::saveSfen()
 {
-    const QString path = downloadsDir().absoluteFilePath(
+    const QString path = exportStagingDir().absoluteFilePath(
         QStringLiteral("shogi-%1.sfen")
             .arg(QDateTime::currentDateTime().toString(QStringLiteral("yyyyMMdd-HHmmss"))));
     QFile f(path);
@@ -278,21 +284,8 @@ QString Game::saveSfen()
     }
     f.write(kifu::exportSfenLine(startSfen_, usiMoves_).toUtf8());
     f.close();
-    setKifuMessage(QStringLiteral("保存しました: ") + path);
+    setKifuMessage(QString());
     return path;
-}
-
-QStringList Game::listKifuFiles() const
-{
-    QDir d = downloadsDir();
-    QFileInfoList files = d.entryInfoList(
-        { QStringLiteral("*.kif"), QStringLiteral("*.kifu"),
-          QStringLiteral("*.sfen"), QStringLiteral("*.txt") },
-        QDir::Files, QDir::Time);
-    QStringList out;
-    for (const QFileInfo& fi : files)
-        out << fi.absoluteFilePath();
-    return out;
 }
 
 bool Game::importKifu(const QString& path, int mainSec, int byomiSec)

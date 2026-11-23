@@ -91,10 +91,9 @@ public:
                                    const QString& engineId = QString(),
                                    bool study = false);
 
-    // --- 棋譜の保存・読込 (Downloadsフォルダ) ---
+    // --- 棋譜の保存・読込 (書き出しは専用領域→content-hubへ転送 / 読込は渡されたパス) ---
     Q_INVOKABLE QString saveKif();    // 保存成功でファイルパス、失敗で""(理由 は kifuMessage)
     Q_INVOKABLE QString saveSfen();
-    Q_INVOKABLE QStringList listKifuFiles() const;   // 新規順・最大50件
     Q_INVOKABLE bool importKifu(const QString& path, int mainSec, int byomiSec);
     QString kifuMessage() const { return kifuMessage_; }
 

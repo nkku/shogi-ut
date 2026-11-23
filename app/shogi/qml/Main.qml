@@ -1,5 +1,6 @@
 import QtQuick 2.7
 import Lomiri.Components 1.3
+import Lomiri.Content 1.3
 import QtQuick.Layouts 1.3
 import Qt.labs.settings 1.0
 
@@ -86,10 +87,7 @@ MainView {
                     Layout.fillWidth: true
                     text: i18n.tr('棋譜')
                     baseColor: '#efe7f7'
-                    onClicked: {
-                        kifuDialog.fileModel = game.listKifuFiles()
-                        kifuDialog.open()
-                    }
+                    onClicked: kifuDialog.open()
                 }
                 TapButton {
                     Layout.fillWidth: true
@@ -599,11 +597,11 @@ MainView {
     ModalCard {
         id: kifuDialog
         title: i18n.tr('棋譜')
-        property var fileModel: []
+        property string note: ''
         ColumnLayout {
             spacing: units.gu(1)
             Text {
-                text: i18n.tr('書き出し (Downloadsフォルダへ保存)')
+                text: i18n.tr('書き出し (保存先选择ダイアログへ転送)')
                 font.pixelSize: units.gu(2)
             }
             RowLayout {
@@ -613,60 +611,41 @@ MainView {
                     text: i18n.tr('KIF保存')
                     baseColor: '#dceaf7'
                     enabled: game.ply > 0
-                    onClicked: game.saveKif()
+                    onClicked: {
+                        const p = game.saveKif()
+                        if (p.length > 0) { kifuDialog.close(); kifuPicker.startSave(p) }
+                    }
                 }
                 TapButton {
                     Layout.fillWidth: true
                     text: i18n.tr('SFEN保存')
                     baseColor: '#dceaf7'
                     enabled: game.ply > 0
-                    onClicked: game.saveSfen()
-                }
-            }
-            Text {
-                Layout.fillWidth: true
-                text: game.kifuMessage
-                font.pixelSize: units.gu(1.7)
-                color: '#666666'
-                elide: Text.ElideMiddle
-            }
-            Text {
-                text: i18n.tr('読み込み (Downloads内の棋譜)')
-                font.pixelSize: units.gu(2)
-            }
-            Flickable {
-                Layout.fillWidth: true
-                Layout.preferredHeight: Math.min(kifuList.height, units.gu(22))
-                contentHeight: kifuList.height
-                boundsBehavior: Flickable.StopAtBounds
-                visible: kifuDialog.fileModel.length > 0
-                ColumnLayout {
-                    id: kifuList
-                    width: parent.width
-                    spacing: units.gu(0.5)
-                    Repeater {
-                        model: kifuDialog.fileModel
-                        delegate: TapButton {
-                            Layout.fillWidth: true
-                            text: String(modelData).split('/').pop()
-                            font.pixelSize: units.gu(1.7)
-                            baseColor: '#f5f5f5'
-                            labelElide: Text.ElideMiddle
-                            labelMaximumWidth: units.gu(30)
-                            onClicked: {
-                                if (game.importKifu(modelData, minutesField.value * 60, byomiField.value))
-                                    kifuDialog.close()
-                                kifuDialog.fileModel = game.listKifuFiles()
-                            }
-                        }
+                    onClicked: {
+                        const p = game.saveSfen()
+                        if (p.length > 0) { kifuDialog.close(); kifuPicker.startSave(p) }
                     }
                 }
             }
             Text {
-                visible: kifuDialog.fileModel.length === 0
-                text: i18n.tr('棋譜ファイル (*.kif / *.sfen) がありません')
+                text: i18n.tr('読み込み')
+                font.pixelSize: units.gu(2)
+            }
+            TapButton {
+                Layout.fillWidth: true
+                text: i18n.tr('棋譜ファイルを選ぶ (*.kif / *.sfen)…')
+                baseColor: '#f5f5f5'
+                labelElide: Text.ElideMiddle
+                labelMaximumWidth: units.gu(30)
+                onClicked: { kifuDialog.close(); kifuPicker.startOpen() }
+            }
+            Text {
+                Layout.fillWidth: true
+                text: game.kifuMessage.length > 0 ? game.kifuMessage : kifuDialog.note
                 font.pixelSize: units.gu(1.7)
-                color: '#999999'
+                color: '#666666'
+                visible: text.length > 0
+                elide: Text.ElideMiddle
             }
             RowLayout {
                 Layout.alignment: Qt.AlignRight
@@ -674,6 +653,88 @@ MainView {
                     text: i18n.tr('閉じる')
                     Layout.preferredWidth: units.gu(12)
                     onClicked: kifuDialog.close()
+                }
+            }
+        }
+    }
+
+    // ---- content-hub ピア選択オーバーレイ (書き出し先選択 / 読み込み元選択) ----
+    // apparmor のカスタムパスを持たせないため、ファイルのやり取りは
+    // 標準の content exchange (lomiri-content-hub) 経由で行う。
+    Rectangle {
+        id: kifuPicker
+        anchors.fill: parent
+        visible: false
+        z: 10000
+        color: Theme.palette.normal.background
+        property string mode: ''           // 'save' | 'open'
+        property string pendingUrl: ''
+        property var activeTransfer: null  // 転送完了まで参照を保ちGCで中断させる
+
+        function startSave(path) {
+            mode = 'save'
+            pendingUrl = 'file://' + encodeURI(path)
+            visible = true
+        }
+        function startOpen() {
+            mode = 'open'
+            pendingUrl = ''
+            visible = true
+        }
+        function dismiss() {
+            visible = false
+        }
+
+        Loader {
+            id: pickerLoader
+            anchors.fill: parent
+            sourceComponent: kifuPicker.visible ? peerPickerComp : undefined
+        }
+
+        Component {
+            id: peerPickerComp
+            ContentPeerPicker {
+                showTitle: true
+                headerText: kifuPicker.mode === 'save' ? i18n.tr('書き出し先') : i18n.tr('棋譜を開く')
+                contentType: ContentType.Documents
+                handler: kifuPicker.mode === 'save' ? ContentHandler.Destination : ContentHandler.Source
+                onPeerSelected: {
+                    var t = peer.request()
+                    if (!t) { kifuPicker.dismiss(); return }
+                    kifuPicker.activeTransfer = t
+                    if (kifuPicker.mode === 'save') {
+                        var item = contentItemComp.createObject(kifuPicker, { url: kifuPicker.pendingUrl })
+                        t.items = [item]
+                        t.state = ContentTransfer.Charged
+                        kifuPicker.dismiss()   // 以降の進捗は content-hub 側のUI
+                    }
+                    // 'open' は Charged (ファイル受け取り完了) を待つ
+                }
+                onCancelPressed: kifuPicker.dismiss()
+            }
+        }
+        Component {
+            id: contentItemComp
+            ContentItem {}
+        }
+
+        Connections {
+            target: kifuPicker.activeTransfer
+            function onStateChanged() {
+                var t = kifuPicker.activeTransfer
+                if (!t) return
+                if (kifuPicker.mode === 'open' && t.state === ContentTransfer.Charged) {
+                    var path = ''
+                    if (t.items.length > 0) {
+                        var u = String(t.items[0].url)
+                        path = u.indexOf('file://') === 0 ? decodeURIComponent(u.substring(7)) : u
+                    }
+                    var ok = path.length > 0 && game.importKifu(path, minutesField.value * 60, byomiField.value)
+                    kifuDialog.note = ok ? '' : (game.kifuMessage || i18n.tr('棋譜を読み込めませんでした'))
+                    kifuPicker.dismiss()
+                    if (!ok) kifuDialog.open()
+                } else if (t.state === ContentTransfer.Completed || t.state === ContentTransfer.Aborted) {
+                    kifuPicker.activeTransfer = null
                 }
             }
         }
