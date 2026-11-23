@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/assets">
+        <file>logo.svg</file>
+        <file>board.svg</file>
+        <file>piece.svg</file>
+        <file>sounds/clack.wav</file>
+        <file>sounds/check.wav</file>
+        <file>sounds/end.wav</file>
+    </qresource>
+</RCC>

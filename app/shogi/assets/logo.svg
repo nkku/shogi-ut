@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <title>将棋 — 木製の王将</title>
+  <desc>深緑の盤目を背景に、明るい木製の将棋駒と黒い王の文字を配したアイコン。</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#315c48"/><stop offset="1" stop-color="#15382f"/>
+    </linearGradient>
+    <linearGradient id="wood" x1="0" y1="0" x2=".8" y2="1">
+      <stop stop-color="#fff1cf"/><stop offset=".5" stop-color="#f2d398"/><stop offset="1" stop-color="#dfae63"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#c28d4d"/><stop offset="1" stop-color="#98642f"/>
+    </linearGradient>
+    <clipPath id="background-clip"><rect width="512" height="512" rx="108"/></clipPath>
+    <clipPath id="piece-clip"><path d="M256 60 L350 116 L393 399 Q256 421 119 399 L162 116 Z"/></clipPath>
+  </defs>
+  <rect width="512" height="512" rx="108" fill="url(#background)"/>
+  <g clip-path="url(#background-clip)" fill="none" stroke="#d2dfb7" stroke-width="2" opacity=".12">
+    <path d="M88 38 V488 M158 24 V488 M228 24 V488 M298 24 V488 M368 24 V488 M438 38 V488"/>
+    <path d="M24 108 H488 M24 178 H488 M24 248 H488 M24 318 H488 M24 388 H488 M24 458 H488"/>
+  </g>
+  <rect x="2" y="2" width="508" height="508" rx="106" fill="none" stroke="#ffffff" stroke-width="3" opacity=".12"/>
+  <path d="M256 82 L358 143 L408 429 Q256 454 104 429 L154 143 Z" fill="#061b15" opacity=".20"/>
+  <path d="M256 70 L353 127 L399 414 Q256 437 113 414 L159 127 Z" fill="url(#edge)" stroke="#805326" stroke-width="2"/>
+  <path d="M256 60 L350 116 L393 399 Q256 421 119 399 L162 116 Z" fill="url(#wood)" stroke="#dfb16c" stroke-width="2"/>
+  <g clip-path="url(#piece-clip)" fill="none" stroke="#9b6e34" opacity=".10">
+    <path d="M157 95 Q182 190 165 272 T179 425" stroke-width="1.2"/>
+    <path d="M187 70 Q205 178 189 270 T208 430" stroke-width="1"/>
+    <path d="M225 55 Q216 156 232 265 T226 432" stroke-width="1.2"/>
+    <path d="M263 55 Q278 160 263 278 T281 429" stroke-width="1"/>
+    <path d="M303 69 Q288 177 307 279 T301 429" stroke-width="1.3"/>
+    <path d="M339 90 Q326 190 345 282 T340 425" stroke-width="1.1"/>
+    <path d="M365 102 Q351 195 373 295 T367 423" stroke-width="1"/>
+  </g>
+  <path d="M126 394 L169 121 L256 68 L343 121" fill="none" stroke="#fff9e6" stroke-width="4" opacity=".72"/>
+  <path d="M124 400 Q256 420 388 400" fill="none" stroke="#c28a44" stroke-width="3"/>
+  <!-- 王 is outlined so the icon does not depend on fonts installed on the phone. -->
+  <path fill="#27221b" transform="matrix(0.205405 0 0 -0.205405 152.578 350.470)" d="M41 -10 49 -39H937C953 -39 963 -34 966 -23C917 19 835 81 835 81L763 -10H562V365H857C872 365 882 370 885 381C838 422 761 480 761 480L693 394H562V723H892C907 723 918 728 920 739C872 781 792 842 792 842L721 752H82L90 723H433V394H120L128 365H433V-10Z"/>
+</svg>

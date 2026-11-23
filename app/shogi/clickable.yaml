@@ -1,0 +1,4 @@
+clickable_minimum_required: 8.8.0
+builder: cmake
+kill: shogi
+framework: ubuntu-touch-24.04-1.x

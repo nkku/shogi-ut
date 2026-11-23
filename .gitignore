@@ -1,0 +1,14 @@
+# ビルド生成物
+app/shogi/build/
+*.click
+*.click.conf
+
+# 大きな評価ファイル (scripts/fetch_suisho5.sh で公式リリースから取得)
+app/shogi/engines/suisho5_eval/nn.bin
+
+# 手元調査用の外部ソース・配布物 (再配布不可・大容量)
+/references/
+/engines/
+
+# 開発過程のバックアップ/スクリーンショット
+app/shogi/history/

@@ -1,0 +1,15 @@
+{
+    "name": "shogi.ow",
+    "description": "USIエンジン対応の将棋クライアント",
+    "architecture": "$ENV{ARCH}",
+    "title": "将棋",
+    "hooks": {
+        "shogi": {
+            "apparmor": "shogi.apparmor",
+            "desktop":  "shogi.desktop"
+        }
+    },
+    "version": "1.0.0",
+    "maintainer": "O Wada <o.wada@businesskit.co.jp>",
+    "framework" : "$ENV{CLICK_FRAMEWORK}"
+}
