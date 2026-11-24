@@ -118,6 +118,13 @@ MainView {
                 }
                 Item { Layout.fillWidth: true }
                 Label {
+                    objectName: 'ply-label'
+                    text: (game.ply + 1) + '手目'
+                    font.pixelSize: units.gu(1.8)
+                    color: '#777777'
+                }
+                Item { Layout.fillWidth: true }
+                Label {
                     objectName: 'clock-right'
                     text: {
                         root.boardRevision
@@ -596,7 +603,7 @@ MainView {
                             ctx.lineTo(width - padR, y)
                             ctx.stroke()
                             ctx.fillStyle = zero ? '#665533' : '#9a8a68'
-                            ctx.textBaseline = v >= 900 ? 'top' : (v <= -900 ? 'bottom' : 'middle')
+                            ctx.textBaseline = 'middle'   // 全ラベルをグリッド線中央に揃える
                             ctx.fillText(v > 0 ? '+' + v : (v === 0 ? '0' : '-' + (-v)), 2, y)
                         }
                         if (!pts || pts.length < 2) {
