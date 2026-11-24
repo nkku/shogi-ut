@@ -534,7 +534,11 @@ MainView {
         id: evalGraphDialog
         title: i18n.tr('評価値グラフ')
         property string summary: ''
+        property string detail: ''
+        property int inspectIdx: -1
         onOpened: {
+            detail = ''
+            inspectIdx = -1
             evalCanvas.requestPaint()
             const pts = game.evalCurve
             if (pts && pts.length) {
@@ -553,7 +557,7 @@ MainView {
             spacing: units.gu(1)
             Text {
                 Layout.fillWidth: true
-                text: i18n.tr('左=初手 → 右=終局。上=先手有利。目盛は300点刻みの駒得 (詰みは上限で截み)')
+                text: i18n.tr('左=初手 → 右=終局。上=先手有利。目盛は300点刻みの駒得 (詰みは上限で截み)。グラフをタップで手目の詳細')
                 font.pixelSize: units.gu(1.6)
                 color: '#666666'
                 wrapMode: Text.WordWrap
@@ -569,11 +573,14 @@ MainView {
                     id: evalCanvas
                     anchors.fill: parent
                     anchors.margins: 1
+                    readonly property real padL: 26
+                    readonly property real padR: 6
                     onPaint: {
                         const ctx = getContext('2d')
                         ctx.clearRect(0, 0, width, height)
                         const pts = game.evalCurve
-                        const padL = 26, padR = 6, top = 10, bot = height - 10
+                        const padL = evalCanvas.padL, padR = evalCanvas.padR
+                        const top = 10, bot = height - 12
                         const midY = (top + bot) / 2
                         const scale = (bot - top) / 2 / 1200
                         // 目盛グリッド (300点刻み) と数値ラベル
@@ -600,6 +607,20 @@ MainView {
                             ctx.fillText('評価データがありません', width / 2, height / 2)
                             return
                         }
+                        // x軸: 手数ラベル (総手数に応じて刻みを変更)
+                        const n = pts.length
+                        const stepX = n <= 40 ? 10 : (n <= 80 ? 20 : (n <= 160 ? 40 : 80))
+                        ctx.fillStyle = '#8a7a5a'
+                        ctx.textAlign = 'center'
+                        ctx.textBaseline = 'bottom'
+                        ctx.font = String(Math.round(units.gu(1.2))) + 'px sans-serif'
+                        for (let i = 0; i < n; i++) {
+                            const p = pts[i].ply
+                            if (p === 0 || p % stepX !== 0) continue
+                            const x = padL + (width - padL - padR) * i / (n - 1)
+                            ctx.fillText(String(p), Math.min(Math.max(x, padL + 7), width - padR - 7),
+                                         height - 1)
+                        }
                         ctx.textBaseline = 'alphabetic'
                         ctx.fillStyle = '#999999'
                         ctx.font = String(Math.round(units.gu(1.4))) + 'px sans-serif'
@@ -608,8 +629,8 @@ MainView {
                         ctx.strokeStyle = '#3070c0'
                         ctx.lineWidth = 2
                         ctx.beginPath()
-                        for (let i = 0; i < pts.length; i++) {
-                            const x = padL + (width - padL - padR) * i / (pts.length - 1)
+                        for (let i = 0; i < n; i++) {
+                            const x = padL + (width - padL - padR) * i / (n - 1)
                             let v = pts[i].val
                             if (v > 1200) v = 1200
                             if (v < -1200) v = -1200
@@ -618,9 +639,27 @@ MainView {
                             else ctx.lineTo(x, y)
                         }
                         ctx.stroke()
+                        // タップ位置の詳細マーカー
+                        const k = evalGraphDialog.inspectIdx
+                        if (k >= 0 && k < n) {
+                            const x = padL + (width - padL - padR) * k / (n - 1)
+                            ctx.strokeStyle = '#c05050'
+                            ctx.lineWidth = 1
+                            ctx.beginPath()
+                            ctx.moveTo(x, top)
+                            ctx.lineTo(x, bot)
+                            ctx.stroke()
+                            let v = pts[k].val
+                            if (v > 1200) v = 1200
+                            if (v < -1200) v = -1200
+                            ctx.fillStyle = '#c05050'
+                            ctx.beginPath()
+                            ctx.arc(x, midY - v * scale, 2.5, 0, 2 * Math.PI)
+                            ctx.fill()
+                        }
                         // 終局点の現在値マーカー
                         const lx = width - padR
-                        let lv = pts[pts.length - 1].val
+                        let lv = pts[n - 1].val
                         if (lv > 1200) lv = 1200
                         if (lv < -1200) lv = -1200
                         ctx.fillStyle = '#3070c0'
@@ -628,11 +667,27 @@ MainView {
                         ctx.arc(lx - 1, midY - lv * scale, 2.5, 0, 2 * Math.PI)
                         ctx.fill()
                     }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            const pts = game.evalCurve
+                            if (!pts || pts.length < 1) return
+                            const inner = width - evalCanvas.padL - evalCanvas.padR
+                            let i = Math.round((mouseX - evalCanvas.padL) / inner * (pts.length - 1))
+                            i = Math.max(0, Math.min(pts.length - 1, i))
+                            evalGraphDialog.inspectIdx = i
+                            const p = pts[i]
+                            evalGraphDialog.detail = i18n.tr('手数') + ' ' + p.ply
+                                + (p.move ? ': ' + p.move : '')
+                                + '  ' + i18n.tr('評価') + ' ' + p.text
+                            evalCanvas.requestPaint()
+                        }
+                    }
                 }
             }
             Text {
                 Layout.fillWidth: true
-                text: evalGraphDialog.summary
+                text: evalGraphDialog.detail.length > 0 ? evalGraphDialog.detail : evalGraphDialog.summary
                 font.pixelSize: units.gu(1.6)
                 color: '#333333'
                 visible: text.length > 0

@@ -1041,6 +1041,8 @@ QVariantList Game::evalCurve() const
         m.insert("mate", it->mate);
         m.insert("val", graphVal(*it));
         m.insert("text", fmtEval(*it));
+        if (it.key() >= 1)
+            m.insert("move", moveTextAtPly(it.key()));   // その位置を作った着手 (KIF風)
         out << m;
     }
     return out;

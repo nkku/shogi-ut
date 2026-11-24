@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: shogi.ow\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-24 00:44+0000\n"
+"POT-Creation-Date: 2026-11-24 01:10+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,7 +33,7 @@ msgstr ""
 msgid "投了"
 msgstr ""
 
-#: ../qml/Main.qml:88 ../qml/Main.qml:654
+#: ../qml/Main.qml:88 ../qml/Main.qml:709
 msgid "棋譜"
 msgstr ""
 
@@ -57,7 +57,7 @@ msgstr ""
 msgid "対局終了"
 msgstr ""
 
-#: ../qml/Main.qml:387 ../qml/Main.qml:644 ../qml/Main.qml:708
+#: ../qml/Main.qml:387 ../qml/Main.qml:699 ../qml/Main.qml:763
 msgid "閉じる"
 msgstr ""
 
@@ -137,55 +137,64 @@ msgstr ""
 msgid "開始"
 msgstr ""
 
-#: ../qml/Main.qml:547
+#: ../qml/Main.qml:551
 msgid "手目"
 msgstr ""
 
-#: ../qml/Main.qml:547
+#: ../qml/Main.qml:551
 msgid "終局評価"
 msgstr ""
 
-#: ../qml/Main.qml:548
+#: ../qml/Main.qml:552
 msgid "最大先手"
 msgstr ""
 
-#: ../qml/Main.qml:549
+#: ../qml/Main.qml:553
 msgid "最大後手"
 msgstr ""
 
-#: ../qml/Main.qml:556
+#: ../qml/Main.qml:560
 msgid ""
-"左=初手 → 右=終局。上=先手有利。目盛は300点刻みの駒得 (詰みは上限で截み)"
+"左=初手 → 右=終局。上=先手有利。目盛は300点刻みの駒得 (詰みは上限で截み)。グ"
+"ラフをタップで手目の詳細"
 msgstr ""
 
-#: ../qml/Main.qml:659
+#: ../qml/Main.qml:680
+msgid "手数"
+msgstr ""
+
+#: ../qml/Main.qml:682
+msgid "評価"
+msgstr ""
+
+#: ../qml/Main.qml:714
 msgid "書き出し (保存先选择ダイアログへ転送)"
 msgstr ""
 
-#: ../qml/Main.qml:666
+#: ../qml/Main.qml:721
 msgid "KIF保存"
 msgstr ""
 
-#: ../qml/Main.qml:676
+#: ../qml/Main.qml:731
 msgid "SFEN保存"
 msgstr ""
 
-#: ../qml/Main.qml:686
+#: ../qml/Main.qml:741
 msgid "読み込み"
 msgstr ""
 
-#: ../qml/Main.qml:691
+#: ../qml/Main.qml:746
 msgid "棋譜ファイルを選ぶ (*.kif / *.sfen)…"
 msgstr ""
 
-#: ../qml/Main.qml:753
+#: ../qml/Main.qml:808
 msgid "書き出し先"
 msgstr ""
 
-#: ../qml/Main.qml:753
+#: ../qml/Main.qml:808
 msgid "棋譜を開く"
 msgstr ""
 
-#: ../qml/Main.qml:788
+#: ../qml/Main.qml:843
 msgid "棋譜を読み込めませんでした"
 msgstr ""
