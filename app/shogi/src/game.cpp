@@ -380,6 +380,7 @@ bool Game::importKifu(const QString& path, int mainSec, int byomiSec)
     studySuspend_ = false;
     emit ended();
     setKifuMessage(QStringLiteral("%1手 読み込みました").arg(usiMoves_.size()));
+    emit evalCurveChanged();   // canReplay等のバインディングを手数変化後も再評価させる
     maybeStartAnalysis();
     return true;
 }

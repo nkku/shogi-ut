@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: shogi.ow\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-24 23:15+0000\n"
+"POT-Creation-Date: 2026-11-24 23:23+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,7 +33,7 @@ msgstr ""
 msgid "投了"
 msgstr ""
 
-#: ../qml/Main.qml:88 ../qml/Main.qml:746
+#: ../qml/Main.qml:88 ../qml/Main.qml:747
 msgid "棋譜"
 msgstr ""
 
@@ -57,7 +57,7 @@ msgstr ""
 msgid "対局終了"
 msgstr ""
 
-#: ../qml/Main.qml:394 ../qml/Main.qml:736 ../qml/Main.qml:800
+#: ../qml/Main.qml:394 ../qml/Main.qml:737 ../qml/Main.qml:801
 msgid "閉じる"
 msgstr ""
 
@@ -129,7 +129,7 @@ msgstr ""
 msgid "スレッド"
 msgstr ""
 
-#: ../qml/Main.qml:510 ../qml/Main.qml:728
+#: ../qml/Main.qml:510 ../qml/Main.qml:729
 msgid "中止"
 msgstr ""
 
@@ -167,46 +167,46 @@ msgstr ""
 msgid "評価"
 msgstr ""
 
-#: ../qml/Main.qml:720
+#: ../qml/Main.qml:721
 msgid "再生成中 "
 msgstr ""
 
-#: ../qml/Main.qml:721
+#: ../qml/Main.qml:722
 msgid "この棋譜の評価値が未記録です (再生成 約1.2秒/局面)"
 msgstr ""
 
-#: ../qml/Main.qml:728
+#: ../qml/Main.qml:729
 msgid "再生成"
 msgstr ""
 
-#: ../qml/Main.qml:751
+#: ../qml/Main.qml:752
 msgid "書き出し (保存先选择ダイアログへ転送)"
 msgstr ""
 
-#: ../qml/Main.qml:758
+#: ../qml/Main.qml:759
 msgid "KIF保存"
 msgstr ""
 
-#: ../qml/Main.qml:768
+#: ../qml/Main.qml:769
 msgid "SFEN保存"
 msgstr ""
 
-#: ../qml/Main.qml:778
+#: ../qml/Main.qml:779
 msgid "読み込み"
 msgstr ""
 
-#: ../qml/Main.qml:783
+#: ../qml/Main.qml:784
 msgid "棋譜ファイルを選ぶ (*.kif / *.sfen)…"
 msgstr ""
 
-#: ../qml/Main.qml:845
+#: ../qml/Main.qml:846
 msgid "書き出し先"
 msgstr ""
 
-#: ../qml/Main.qml:845
+#: ../qml/Main.qml:846
 msgid "棋譜を開く"
 msgstr ""
 
-#: ../qml/Main.qml:880
+#: ../qml/Main.qml:881
 msgid "棋譜を読み込めませんでした"
 msgstr ""

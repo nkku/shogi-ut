@@ -713,7 +713,8 @@ MainView {
             }
             RowLayout {
                 Layout.fillWidth: true
-                visible: game.replayProgress.length > 0 || game.canReplay
+                // 親ダイアログを開いた時点で必ず再評価させる (手数変化のnotifyに依存しない)
+                visible: evalGraphDialog.visible && (game.replayProgress.length > 0 || game.canReplay)
                 Text {
                     Layout.fillWidth: true
                     text: game.replayProgress.length > 0
