@@ -93,7 +93,7 @@ MainView {
                     Layout.fillWidth: true
                     text: i18n.tr('グラフ')
                     baseColor: '#f7f0dc'
-                    enabled: game.hasEvalGraph
+                    enabled: game.hasEvalGraph || game.ply > 1
                     onClicked: evalGraphDialog.open()
                 }
                 TapButton {
@@ -543,10 +543,7 @@ MainView {
         property string summary: ''
         property string detail: ''
         property int inspectIdx: -1
-        onOpened: {
-            detail = ''
-            inspectIdx = -1
-            evalCanvas.requestPaint()
+        function rebuildSummary() {
             const pts = game.evalCurve
             if (pts && pts.length) {
                 let hi = pts[0], lo = pts[0]
@@ -559,6 +556,20 @@ MainView {
                           + ' · ' + i18n.tr('最大先手') + ' ' + hi.text + ' (' + hi.ply + ') · '
                           + i18n.tr('最大後手') + ' ' + lo.text + ' (' + lo.ply + ')'
             } else summary = ''
+        }
+        onOpened: {
+            detail = ''
+            inspectIdx = -1
+            evalCanvas.requestPaint()
+            rebuildSummary()
+        }
+        Connections {
+            target: game
+            function onEvalCurveChanged() {
+                if (!evalGraphDialog.visible) return
+                evalCanvas.requestPaint()
+                if (evalGraphDialog.detail.length === 0) rebuildSummary()
+            }
         }
         ColumnLayout {
             spacing: units.gu(1)
@@ -699,6 +710,25 @@ MainView {
                 color: '#333333'
                 visible: text.length > 0
                 wrapMode: Text.WordWrap
+            }
+            RowLayout {
+                Layout.fillWidth: true
+                visible: game.replayProgress.length > 0 || game.canReplay
+                Text {
+                    Layout.fillWidth: true
+                    text: game.replayProgress.length > 0
+                          ? i18n.tr('再生成中 ') + game.replayProgress + ' …'
+                          : i18n.tr('この棋譜の評価値が未記録です (再生成 約1.2秒/局面)')
+                    font.pixelSize: units.gu(1.6)
+                    color: '#c05050'
+                    wrapMode: Text.WordWrap
+                }
+                TapButton {
+                    Layout.preferredWidth: units.gu(13)
+                    text: game.replayProgress.length > 0 ? i18n.tr('中止') : i18n.tr('再生成')
+                    baseColor: '#dceaf7'
+                    onClicked: game.replayProgress.length > 0 ? game.stopReplay() : game.startReplay()
+                }
             }
             RowLayout {
                 Layout.alignment: Qt.AlignRight

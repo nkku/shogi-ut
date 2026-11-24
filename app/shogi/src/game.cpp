@@ -723,6 +723,74 @@ void Game::maybeStartAnalysis()
     updateStatus();
 }
 
+// --- 評価値グラフの再生成 (KIF/SFEN取り込み後は評価が未記録のため再検討する) ---
+
+static int startTurnOfSfen(const QString& sfen)
+{
+    const QStringList f = sfen.split(QLatin1Char(' '));
+    return (f.size() >= 3 && f.at(2) == QLatin1String("w")) ? int(Gote) : int(Sente);
+}
+
+void Game::setReplayProgress(const QString& s)
+{
+    if (replayProgress_ == s) return;
+    replayProgress_ = s;
+    emit replayProgressChanged();
+}
+
+void Game::startReplay()
+{
+    if (replayPly_ > 0) return;
+    if (usiMoves_.size() < 2 || searchKind_ == SearchGame || !engine_.ready()) {
+        pendingReplayStart_ = false;
+        studySuspend_ = false;     // pending経路で立てていた旗を戻す
+        return;
+    }
+    if (engine_.thinking()) {
+        // 検討探索中なら停止完了 (onSearchFinished) から開始する
+        studySuspend_ = true;
+        pendingReplayStart_ = true;
+        engine_.stop();
+        return;
+    }
+    replayTarget_ = usiMoves_.size();
+    studySuspend_ = true;
+    stepReplay();
+}
+
+void Game::stopReplay()
+{
+    if (replayPly_ <= 0 && !pendingReplayStart_) return;
+    pendingReplayStart_ = false;
+    replayPly_ = 0;
+    replayTarget_ = 0;
+    studySuspend_ = false;
+    setReplayProgress(QString());
+    if (engine_.thinking()) engine_.stop();
+}
+
+void Game::stepReplay()
+{
+    int p = replayPly_ > 0 ? replayPly_ : 1;
+    while (p <= replayTarget_ && curve_.contains(p)) ++p;   // 既存記録はスキップ
+    if (p > replayTarget_) {                                // 完了
+        replayPly_ = 0;
+        replayTarget_ = 0;
+        studySuspend_ = false;
+        setReplayProgress(QString());
+        maybeStartAnalysis();       // 対局継続中なら通常の検討に戻る
+        return;
+    }
+    replayPly_ = p;
+    setReplayProgress(QStringLiteral("%1/%2").arg(p).arg(replayTarget_));
+    searchKind_ = SearchReplay;
+    searchPly_ = p;
+    searchTurn_ = (startTurnOfSfen(startSfen_) + p) % 2;    // 探索視点の手番側
+    lastEval_ = EvalRec();
+    applyMultiPv(1);
+    engine_.analyze(startSfen_, usiMoves_.mid(0, p), 1200);
+}
+
 void Game::onSearchFinished()
 {
     if (engine_.thinking() || searchKind_ == SearchNone) return;
@@ -744,19 +812,36 @@ void Game::onSearchFinished()
         }
         return;
     }
+    if (kind == SearchReplay) {
+        if (replayPly_ > 0) {
+            replayPly_ = searchPly_ + 1;    // 次へ (既存記録は stepReplay が飛ばす)
+            stepReplay();
+        } else if (pendingReplayStart_) {
+            pendingReplayStart_ = false;    // stop完了 → 再生成開始
+            startReplay();
+        } else {
+            // stopReplay による中断
+            replayTarget_ = 0;
+            studySuspend_ = false;
+            setReplayProgress(QString());
+            maybeStartAnalysis();
+        }
+        return;
+    }
     if (kind == SearchAnalysis) {
         // 盤が進んでいない=収斂(movetime消化)まで走った検討なら同一局面を繰返さない
         if (!pendingThink_ && searchPly_ == usiMoves_.size())
             analysisDonePly_ = searchPly_;
         // 検討を止めた理由が「人間の着手→対局go待ち」ならそこでgoを発行
         if (pendingThink_) { pendingThink_ = false; startThink(); }
+        else if (pendingReplayStart_) { pendingReplayStart_ = false; startReplay(); }
         else maybeStartAnalysis();                     // 連続検討 (二面打ちなど)
     }
 }
 
 void Game::onEvalInfo(int multipv, int depth, int cp, int matePly, const QString& pvFirst)
 {
-    if (over_ || searchKind_ == SearchNone) return;
+    if (searchKind_ == SearchNone || (over_ && searchKind_ != SearchReplay)) return;
     if (multipv == 1 && depth >= 1 && depth >= lastEval_.depth)
         lastEval_ = EvalRec{cp, matePly, depth, true};
 
@@ -824,6 +909,10 @@ void Game::resetEvalState()
     searchKind_ = SearchNone;
     gameGoRetries_ = 0;
     analysisDonePly_ = -1;
+    replayPly_ = 0;
+    replayTarget_ = 0;
+    pendingReplayStart_ = false;
+    setReplayProgress(QString());
     clearHints();
     evalMessage_.clear();
     emit evalMessageChanged();

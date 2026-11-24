@@ -34,6 +34,8 @@ class Game : public QObject {
     Q_PROPERTY(QVariantList evalCurve READ evalCurve NOTIFY evalCurveChanged)
     Q_PROPERTY(bool hasEvalGraph READ hasEvalGraph NOTIFY evalCurveChanged)
     Q_PROPERTY(QString evalMessage READ evalMessage NOTIFY evalMessageChanged)
+    Q_PROPERTY(QString replayProgress READ replayProgress NOTIFY replayProgressChanged)
+    Q_PROPERTY(bool canReplay READ canReplay NOTIFY evalCurveChanged)
 public:
     explicit Game(QObject* parent = nullptr);
     ~Game() override;
@@ -57,6 +59,19 @@ public:
 
     // --- 学習モード / 評価値 ---
     Q_INVOKABLE void showHint(int index);   // 0=最善手 1=次善手: 盤面強調の表示/非表示を切替
+    // 評価値グラフ再生成: 棋譜取り込み後などに全局面を順に再検討する (1局面~1.2秒)
+    Q_INVOKABLE void startReplay();
+    Q_INVOKABLE void stopReplay();
+    QString replayProgress() const { return replayProgress_; }   // "12/108" or ""
+    bool canReplay() const
+    {
+        if (replayPly_ > 0) return false;
+        const int n = usiMoves_.size();
+        if (n < 2) return false;
+        for (int p = 1; p <= n; ++p)
+            if (!curve_.contains(p)) return true;
+        return false;
+    }
     QVariantList evalCurve() const;         // [{ply,cp,mate,val,text}] 先手視点
     bool hasEvalGraph() const { return curve_.size() >= 2; }
     QString evalMessage() const { return evalMessage_; }
@@ -132,6 +147,7 @@ signals:
     void hintsChanged();
     void evalCurveChanged();
     void evalMessageChanged();
+    void replayProgressChanged();
 
 private slots:
     void onEngineReadyChanged();
@@ -141,7 +157,7 @@ private slots:
     void onTick();
 
 private:
-    enum SearchKind { SearchNone, SearchGame, SearchAnalysis };
+    enum SearchKind { SearchNone, SearchGame, SearchAnalysis, SearchReplay };
     struct EvalRec {
         int cp = 0;      // 先手視点に変換済み
         int mate = 0;    // 先手視点: +n=先手勝ち/n手で詰ます, -n=後手勝ち
@@ -158,6 +174,8 @@ private:
     void startThink();
     void maybeStartAnalysis();
     void applyMultiPv(int n);        // 対局=1/検討=2 (エンジンアイドル時のみ送信)
+    void stepReplay();               // 再生成: 次の未記録plyを検討、なければ完了扱い
+    void setReplayProgress(const QString& s);
     void onSearchFinished();       // engine thinking=false 時に探索を確定
     void commitEval();
     void resetEvalState();
@@ -209,6 +227,10 @@ private:
     int analysisDonePly_ = -1;       // このplyで検討収斂済みなら再探索しない
     int searchPly_ = 0;              // 収斂中の探索が始まった時点のply
     int searchTurn_ = 0;             // その探索の着手側(=探索視点)
+    int replayPly_ = 0;              // 再生成: 検討中のply (0=再生成inactive)
+    int replayTarget_ = 0;           // 再生成の最終ply
+    bool pendingReplayStart_ = false; // 検討中のstop完了後に再生成を開始する
+    QString replayProgress_;
     EvalRec lastEval_;               // 収斂中の探索の最新info評価(探索視点)
     QMap<int, EvalRec> curve_;       // ply → 先手視点評価
     QString hintUsi_[2];
