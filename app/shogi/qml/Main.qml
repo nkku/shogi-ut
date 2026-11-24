@@ -450,7 +450,18 @@ MainView {
             }
             RowLayout {
                 Text { text: i18n.tr('持時間(分)'); font.pixelSize: units.gu(2) }
-                NumField { id: minutesField; minimumValue: 1; maximumValue: 60; value: 10; step: 5 }
+                NumField {
+                    id: minutesField
+                    minimumValue: 1; maximumValue: 420; value: 10   // 420分=7時間 (プロ棋戦上限)
+                    step: value >= 120 ? 30 : (value >= 60 ? 15 : 5)
+                }
+                Text {
+                    visible: minutesField.value >= 60
+                    text: Math.floor(minutesField.value / 60) + '時間'
+                          + (minutesField.value % 60 ? (minutesField.value % 60) + '分' : '')
+                    font.pixelSize: units.gu(1.6)
+                    color: '#666666'
+                }
             }
             RowLayout {
                 Text { text: i18n.tr('秒読み'); font.pixelSize: units.gu(2) }
@@ -522,12 +533,27 @@ MainView {
     ModalCard {
         id: evalGraphDialog
         title: i18n.tr('評価値グラフ')
-        onOpened: evalCanvas.requestPaint()
+        property string summary: ''
+        onOpened: {
+            evalCanvas.requestPaint()
+            const pts = game.evalCurve
+            if (pts && pts.length) {
+                let hi = pts[0], lo = pts[0]
+                for (let i = 0; i < pts.length; i++) {
+                    if (pts[i].val > hi.val) hi = pts[i]
+                    if (pts[i].val < lo.val) lo = pts[i]
+                }
+                const last = pts[pts.length - 1]
+                summary = i18n.tr('終局評価') + ' ' + last.text + ' (' + last.ply + i18n.tr('手目') + ')'
+                          + ' · ' + i18n.tr('最大先手') + ' ' + hi.text + ' (' + hi.ply + ') · '
+                          + i18n.tr('最大後手') + ' ' + lo.text + ' (' + lo.ply + ')'
+            } else summary = ''
+        }
         ColumnLayout {
             spacing: units.gu(1)
             Text {
                 Layout.fillWidth: true
-                text: i18n.tr('左=初手 → 右=終局。上=先手有利 (詰みは上限で截み)')
+                text: i18n.tr('左=初手 → 右=終局。上=先手有利。目盛は300点刻みの駒得 (詰みは上限で截み)')
                 font.pixelSize: units.gu(1.6)
                 color: '#666666'
                 wrapMode: Text.WordWrap
@@ -547,22 +573,34 @@ MainView {
                         const ctx = getContext('2d')
                         ctx.clearRect(0, 0, width, height)
                         const pts = game.evalCurve
+                        const padL = 26, padR = 6, top = 10, bot = height - 10
+                        const midY = (top + bot) / 2
+                        const scale = (bot - top) / 2 / 1200
+                        // 目盛グリッド (300点刻み) と数値ラベル
+                        ctx.font = String(Math.round(units.gu(1.3))) + 'px sans-serif'
+                        ctx.textAlign = 'left'
+                        for (let v = -1200; v <= 1200; v += 300) {
+                            const y = midY - v * scale
+                            const zero = v === 0
+                            ctx.strokeStyle = zero ? '#b0a080' : '#e0d5be'
+                            ctx.lineWidth = 1
+                            ctx.beginPath()
+                            ctx.moveTo(padL, y)
+                            ctx.lineTo(width - padR, y)
+                            ctx.stroke()
+                            ctx.fillStyle = zero ? '#665533' : '#9a8a68'
+                            ctx.textBaseline = v >= 900 ? 'top' : (v <= -900 ? 'bottom' : 'middle')
+                            ctx.fillText(v > 0 ? '+' + v : (v === 0 ? '0' : '-' + (-v)), 2, y)
+                        }
                         if (!pts || pts.length < 2) {
                             ctx.fillStyle = '#999999'
                             ctx.textAlign = 'center'
+                            ctx.textBaseline = 'middle'
                             ctx.font = String(Math.round(units.gu(1.8))) + 'px sans-serif'
                             ctx.fillText('評価データがありません', width / 2, height / 2)
                             return
                         }
-                        const padX = 4, top = 10, bot = height - 10
-                        const midY = (top + bot) / 2
-                        const scale = (bot - top) / 2 / 1200
-                        ctx.strokeStyle = '#b0a080'
-                        ctx.lineWidth = 1
-                        ctx.beginPath()
-                        ctx.moveTo(padX, midY)
-                        ctx.lineTo(width - padX, midY)
-                        ctx.stroke()
+                        ctx.textBaseline = 'alphabetic'
                         ctx.fillStyle = '#999999'
                         ctx.font = String(Math.round(units.gu(1.4))) + 'px sans-serif'
                         ctx.fillText('先', width - 14, top + 8)
@@ -571,7 +609,7 @@ MainView {
                         ctx.lineWidth = 2
                         ctx.beginPath()
                         for (let i = 0; i < pts.length; i++) {
-                            const x = padX + (width - 2 * padX) * i / (pts.length - 1)
+                            const x = padL + (width - padL - padR) * i / (pts.length - 1)
                             let v = pts[i].val
                             if (v > 1200) v = 1200
                             if (v < -1200) v = -1200
@@ -580,8 +618,25 @@ MainView {
                             else ctx.lineTo(x, y)
                         }
                         ctx.stroke()
+                        // 終局点の現在値マーカー
+                        const lx = width - padR
+                        let lv = pts[pts.length - 1].val
+                        if (lv > 1200) lv = 1200
+                        if (lv < -1200) lv = -1200
+                        ctx.fillStyle = '#3070c0'
+                        ctx.beginPath()
+                        ctx.arc(lx - 1, midY - lv * scale, 2.5, 0, 2 * Math.PI)
+                        ctx.fill()
                     }
                 }
+            }
+            Text {
+                Layout.fillWidth: true
+                text: evalGraphDialog.summary
+                font.pixelSize: units.gu(1.6)
+                color: '#333333'
+                visible: text.length > 0
+                wrapMode: Text.WordWrap
             }
             RowLayout {
                 Layout.alignment: Qt.AlignRight

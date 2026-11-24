@@ -444,7 +444,14 @@ QString Game::clockText(int t) const
 {
     int ms = clockMs(t);
     int sec = (ms + 999) / 1000;
-    QString s = QStringLiteral("%1:%2").arg(sec / 60).arg(sec % 60, 2, 10, QLatin1Char('0'));
+    QString s;
+    if (sec >= 3600)   // 7時間級の持時間対応
+        s = QStringLiteral("%1:%2:%3")
+                .arg(sec / 3600)
+                .arg((sec % 3600) / 60, 2, 10, QLatin1Char('0'))
+                .arg(sec % 60, 2, 10, QLatin1Char('0'));
+    else
+        s = QStringLiteral("%1:%2").arg(sec / 60).arg(sec % 60, 2, 10, QLatin1Char('0'));
     if (inByomi_[t]) s = QStringLiteral("byo ") + s;
     return s;
 }

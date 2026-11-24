@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: shogi.ow\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 02:59+0000\n"
+"POT-Creation-Date: 2026-11-24 00:44+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,7 +33,7 @@ msgstr ""
 msgid "投了"
 msgstr ""
 
-#: ../qml/Main.qml:88 ../qml/Main.qml:599
+#: ../qml/Main.qml:88 ../qml/Main.qml:654
 msgid "棋譜"
 msgstr ""
 
@@ -57,11 +57,11 @@ msgstr ""
 msgid "対局終了"
 msgstr ""
 
-#: ../qml/Main.qml:387 ../qml/Main.qml:589 ../qml/Main.qml:653
+#: ../qml/Main.qml:387 ../qml/Main.qml:644 ../qml/Main.qml:708
 msgid "閉じる"
 msgstr ""
 
-#: ../qml/Main.qml:399 ../qml/Main.qml:524
+#: ../qml/Main.qml:399 ../qml/Main.qml:535
 msgid "評価値グラフ"
 msgstr ""
 
@@ -97,78 +97,95 @@ msgstr ""
 msgid "持時間(分)"
 msgstr ""
 
-#: ../qml/Main.qml:456
+#: ../qml/Main.qml:467
 msgid "秒読み"
 msgstr ""
 
-#: ../qml/Main.qml:460
+#: ../qml/Main.qml:471
 msgid "CPU戦のみの設定"
 msgstr ""
 
-#: ../qml/Main.qml:464
+#: ../qml/Main.qml:475
 msgid "エンジン"
 msgstr ""
 
-#: ../qml/Main.qml:470
+#: ../qml/Main.qml:481
 msgid "つようら王11"
 msgstr ""
 
-#: ../qml/Main.qml:470
+#: ../qml/Main.qml:481
 msgid "やねうら王"
 msgstr ""
 
-#: ../qml/Main.qml:470
+#: ../qml/Main.qml:481
 msgid "水匠5"
 msgstr ""
 
-#: ../qml/Main.qml:483
+#: ../qml/Main.qml:494
 msgid "エンジンパス(空=同梱の将棋エンジン)"
 msgstr ""
 
-#: ../qml/Main.qml:486
+#: ../qml/Main.qml:497
 msgid "スレッド"
 msgstr ""
 
-#: ../qml/Main.qml:492
+#: ../qml/Main.qml:503
 msgid "中止"
 msgstr ""
 
-#: ../qml/Main.qml:497
+#: ../qml/Main.qml:508
 msgid "開始"
 msgstr ""
 
-#: ../qml/Main.qml:530
-msgid "左=初手 → 右=終局。上=先手有利 (詰みは上限で截み)"
+#: ../qml/Main.qml:547
+msgid "手目"
 msgstr ""
 
-#: ../qml/Main.qml:604
+#: ../qml/Main.qml:547
+msgid "終局評価"
+msgstr ""
+
+#: ../qml/Main.qml:548
+msgid "最大先手"
+msgstr ""
+
+#: ../qml/Main.qml:549
+msgid "最大後手"
+msgstr ""
+
+#: ../qml/Main.qml:556
+msgid ""
+"左=初手 → 右=終局。上=先手有利。目盛は300点刻みの駒得 (詰みは上限で截み)"
+msgstr ""
+
+#: ../qml/Main.qml:659
 msgid "書き出し (保存先选择ダイアログへ転送)"
 msgstr ""
 
-#: ../qml/Main.qml:611
+#: ../qml/Main.qml:666
 msgid "KIF保存"
 msgstr ""
 
-#: ../qml/Main.qml:621
+#: ../qml/Main.qml:676
 msgid "SFEN保存"
 msgstr ""
 
-#: ../qml/Main.qml:631
+#: ../qml/Main.qml:686
 msgid "読み込み"
 msgstr ""
 
-#: ../qml/Main.qml:636
+#: ../qml/Main.qml:691
 msgid "棋譜ファイルを選ぶ (*.kif / *.sfen)…"
 msgstr ""
 
-#: ../qml/Main.qml:698
+#: ../qml/Main.qml:753
 msgid "書き出し先"
 msgstr ""
 
-#: ../qml/Main.qml:698
+#: ../qml/Main.qml:753
 msgid "棋譜を開く"
 msgstr ""
 
-#: ../qml/Main.qml:733
+#: ../qml/Main.qml:788
 msgid "棋譜を読み込めませんでした"
 msgstr ""
