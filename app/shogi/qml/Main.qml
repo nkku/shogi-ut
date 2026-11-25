@@ -119,9 +119,12 @@ MainView {
                 Item { Layout.fillWidth: true }
                 Label {
                     objectName: 'ply-label'
-                    text: (game.ply + 1) + '手目'
+                    text: game.viewPly >= 0
+                          ? game.viewPly + i18n.tr('手目閲覧') : (game.ply + 1) + '手目'
                     font.pixelSize: units.gu(1.8)
-                    color: '#777777'
+                    color: game.viewPly >= 0 ? '#c05050' : '#777777'
+                    tappable: game.viewPly >= 0          // 過去局面閲覧中: タップで最新へ
+                    onTap: game.gotoPly(-1)
                 }
                 Item { Layout.fillWidth: true }
                 Label {
@@ -543,6 +546,7 @@ MainView {
         property string summary: ''
         property string detail: ''
         property int inspectIdx: -1
+        property int inspectPly: -1
         function rebuildSummary() {
             const pts = game.evalCurve
             if (pts && pts.length) {
@@ -560,6 +564,7 @@ MainView {
         onOpened: {
             detail = ''
             inspectIdx = -1
+            inspectPly = -1
             evalCanvas.requestPaint()
             rebuildSummary()
         }
@@ -695,6 +700,7 @@ MainView {
                             i = Math.max(0, Math.min(pts.length - 1, i))
                             evalGraphDialog.inspectIdx = i
                             const p = pts[i]
+                            evalGraphDialog.inspectPly = p.ply
                             evalGraphDialog.detail = i18n.tr('手数') + ' ' + p.ply
                                 + (p.move ? ': ' + p.move : '')
                                 + '  ' + i18n.tr('評価') + ' ' + p.text
@@ -703,9 +709,26 @@ MainView {
                     }
                 }
             }
+            RowLayout {
+                Layout.fillWidth: true
+                visible: evalGraphDialog.detail.length > 0
+                Text {
+                    Layout.fillWidth: true
+                    text: evalGraphDialog.detail
+                    font.pixelSize: units.gu(1.6)
+                    color: '#333333'
+                    wrapMode: Text.WordWrap
+                }
+                TapButton {
+                    visible: evalGraphDialog.inspectPly >= 0
+                    text: i18n.tr('その手目へ')
+                    baseColor: '#f0e6c8'
+                    onClicked: { game.gotoPly(evalGraphDialog.inspectPly); evalGraphDialog.close() }
+                }
+            }
             Text {
                 Layout.fillWidth: true
-                text: evalGraphDialog.detail.length > 0 ? evalGraphDialog.detail : evalGraphDialog.summary
+                text: evalGraphDialog.detail.length === 0 ? evalGraphDialog.summary : ''
                 font.pixelSize: units.gu(1.6)
                 color: '#333333'
                 visible: text.length > 0

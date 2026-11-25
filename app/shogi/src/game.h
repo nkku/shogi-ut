@@ -36,6 +36,7 @@ class Game : public QObject {
     Q_PROPERTY(QString evalMessage READ evalMessage NOTIFY evalMessageChanged)
     Q_PROPERTY(QString replayProgress READ replayProgress NOTIFY replayProgressChanged)
     Q_PROPERTY(bool canReplay READ canReplay NOTIFY evalCurveChanged)
+    Q_PROPERTY(int viewPly READ viewPly NOTIFY boardChanged)
 public:
     explicit Game(QObject* parent = nullptr);
     ~Game() override;
@@ -63,6 +64,9 @@ public:
     Q_INVOKABLE void startReplay();
     Q_INVOKABLE void stopReplay();
     QString replayProgress() const { return replayProgress_; }   // "12/108" or ""
+    int viewPly() const { return viewPly_; }                     // -1=最新局面, >=0=閲覧中の手数
+    // 閲覧: 経過ply手目の局面へ盤面だけ巻き戻す (ply<0=最新へ復帰)
+    Q_INVOKABLE bool gotoPly(int ply);
     bool canReplay() const
     {
         if (replayPly_ > 0) return false;
@@ -229,6 +233,7 @@ private:
     int searchTurn_ = 0;             // その探索の着手側(=探索視点)
     int replayPly_ = 0;              // 再生成: 検討中のply (0=再生成inactive)
     int replayTarget_ = 0;           // 再生成の最終ply
+    int viewPly_ = -1;               // 盤面閲覧: 巻き戻し先手数 (-1=最新)
     bool pendingReplayStart_ = false; // 検討中のstop完了後に再生成を開始する
     QString replayProgress_;
     EvalRec lastEval_;               // 収斂中の探索の最新info評価(探索視点)

@@ -80,6 +80,7 @@ void Game::setupGame(int mainSec, int byomiSec)
     targets_.clear(); promotePair_.clear(); promoteAsked_ = false;
     lastFrom_ = lastTo_ = NONE;
     over_ = false; resultText_.clear();
+    viewPly_ = -1;
     byomiMs_ = byomiSec * 1000;
     inByomi_[0] = inByomi_[1] = mainSec <= 0 && byomiMs_ > 0;
     clock_[0] = clock_[1] = inByomi_[0] ? byomiMs_ : qint64(mainSec) * 1000;
@@ -459,9 +460,50 @@ QString Game::clockText(int t) const
 
 // --- 入力 ------------------------------------------------------------------
 
+// 局面閲覧: startSfen_からply手目までを並べ直して盤面だけ巻き戻す。
+// 対局データ (usiMoves_/時計/终局状態) はそのまま。閲覧中は人間入力と
+// 対局探索の発行を止めるので、bestmoveが古い盤面に着地することはない。
+bool Game::gotoPly(int ply)
+{
+    const int n = usiMoves_.size();
+    if (ply < 0) ply = n;
+    if (ply > n) return false;
+    if (viewPly_ == ply) return true;
+    if (searchKind_ == SearchGame && engine_.thinking())
+        return false;   // 対局探索の指し手確定中は巻き戻せない
+    Board b;
+    if (!b.loadSfen(startSfen_.toLatin1().constData())) return false;
+    for (int i = 0; i < ply; ++i) {
+        Move m;
+        if (!Board::parseUsiMove(usiMoves_[i].toStdString(), m)) return false;
+        b.make(m);
+    }
+    board_ = b;
+    clearSelection();
+    if (ply >= 1) {
+        Move m;
+        if (Board::parseUsiMove(usiMoves_[ply - 1].toStdString(), m)) {
+            lastFrom_ = m.from; lastTo_ = m.to;
+            emit lastMove(m.from, m.to);
+        }
+    } else {
+        lastFrom_ = lastTo_ = NONE;
+        emit lastMove(NONE, NONE);
+    }
+    viewPly_ = (ply == n) ? -1 : ply;
+    emit boardChanged();
+    updateStatus();
+    if (viewPly_ == -1 && !over_) {          // 最新局面へ復帰したら詰まり解除
+        if (engineColor_ >= 0 && int(board_.turn()) == engineColor_) startThink();
+        else maybeStartAnalysis();
+    }
+    return true;
+}
+
 bool Game::interactive() const
 {
     if (over_ || promoteAsked_) return false;
+    if (viewPly_ >= 0) return false;         // 過去局面を閲覧中は入力不可
     // 学習検討中は人間入力を許可 (着手時にstop→対局goへ切り替える)
     if (engine_.thinking() && searchKind_ != SearchAnalysis) return false;
     return engineColor_ < 0 || int(board_.turn()) != engineColor_;
@@ -685,6 +727,7 @@ void Game::applyMultiPv(int n)
 void Game::startThink()
 {
     if (engineColor_ < 0 || over_) return;
+    if (viewPly_ >= 0) return;               // 閲覧中はgoを発行しない (復帰時に再試行)
     if (int(board_.turn()) != engineColor_) return;
     if (!engine_.ready()) { updateStatus(); return; } // readyChangedで再試行
     if (engine_.thinking()) {
