@@ -62,7 +62,7 @@ MainView {
             }
             spacing: units.gu(0.5)
 
-            // ---- ツールバー ----
+            // ---- ツールバー (6ボタンを2行に分割: FP5幅で右端が切れないため) ----
             RowLayout {
                 Layout.fillWidth: true
                 spacing: units.gu(0.5)
@@ -83,6 +83,10 @@ MainView {
                     baseColor: '#f7dcdc'
                     onClicked: game.resign()
                 }
+            }
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: units.gu(0.5)
                 TapButton {
                     Layout.fillWidth: true
                     text: i18n.tr('棋譜')
@@ -97,7 +101,7 @@ MainView {
                     onClicked: evalGraphDialog.open()
                 }
                 TapButton {
-                    Layout.preferredWidth: units.gu(6)
+                    Layout.fillWidth: true
                     text: root.soundOn ? '音' : '消'
                     baseColor: root.soundOn ? '#c9e8c1' : '#e8e8e8'
                     onClicked: root.soundOn = !root.soundOn

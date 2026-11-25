@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: shogi.ow\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-25 10:21+0000\n"
+"POT-Creation-Date: 2026-11-25 10:39+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,188 +33,188 @@ msgstr ""
 msgid "投了"
 msgstr ""
 
-#: ../qml/Main.qml:88 ../qml/Main.qml:770
+#: ../qml/Main.qml:92 ../qml/Main.qml:774
 msgid "棋譜"
 msgstr ""
 
-#: ../qml/Main.qml:94
+#: ../qml/Main.qml:98
 msgid "グラフ"
 msgstr ""
 
-#: ../qml/Main.qml:123
+#: ../qml/Main.qml:127
 msgid "手目閲覧"
 msgstr ""
 
-#: ../qml/Main.qml:364
+#: ../qml/Main.qml:368
 msgid "成りますか？"
 msgstr ""
 
-#: ../qml/Main.qml:369
+#: ../qml/Main.qml:373
 msgid "成る"
 msgstr ""
 
-#: ../qml/Main.qml:375
+#: ../qml/Main.qml:379
 msgid "不成"
 msgstr ""
 
-#: ../qml/Main.qml:385
+#: ../qml/Main.qml:389
 msgid "対局終了"
 msgstr ""
 
-#: ../qml/Main.qml:397 ../qml/Main.qml:760 ../qml/Main.qml:824
+#: ../qml/Main.qml:401 ../qml/Main.qml:764 ../qml/Main.qml:828
 msgid "閉じる"
 msgstr ""
 
-#: ../qml/Main.qml:409 ../qml/Main.qml:545
+#: ../qml/Main.qml:413 ../qml/Main.qml:549
 msgid "評価値グラフ"
 msgstr ""
 
-#: ../qml/Main.qml:420
+#: ../qml/Main.qml:424
 msgid "対局を始める"
 msgstr ""
 
-#: ../qml/Main.qml:432
+#: ../qml/Main.qml:436
 msgid "新しい対局"
 msgstr ""
 
-#: ../qml/Main.qml:436
+#: ../qml/Main.qml:440
 msgid "モード"
 msgstr ""
 
-#: ../qml/Main.qml:442
+#: ../qml/Main.qml:446
 msgid "CPU先手"
 msgstr ""
 
-#: ../qml/Main.qml:442
+#: ../qml/Main.qml:446
 msgid "CPU後手"
 msgstr ""
 
-#: ../qml/Main.qml:442
+#: ../qml/Main.qml:446
 msgid "二面打ち"
 msgstr ""
 
-#: ../qml/Main.qml:456
+#: ../qml/Main.qml:460
 msgid "学習モード (最善手・次善手のヒント)"
 msgstr ""
 
-#: ../qml/Main.qml:462
+#: ../qml/Main.qml:466
 msgid "持時間(分)"
 msgstr ""
 
-#: ../qml/Main.qml:477
+#: ../qml/Main.qml:481
 msgid "秒読み"
 msgstr ""
 
-#: ../qml/Main.qml:481
+#: ../qml/Main.qml:485
 msgid "CPU戦のみの設定"
 msgstr ""
 
-#: ../qml/Main.qml:485
+#: ../qml/Main.qml:489
 msgid "エンジン"
 msgstr ""
 
-#: ../qml/Main.qml:491
+#: ../qml/Main.qml:495
 msgid "つようら王11"
 msgstr ""
 
-#: ../qml/Main.qml:491
+#: ../qml/Main.qml:495
 msgid "やねうら王"
 msgstr ""
 
-#: ../qml/Main.qml:491
+#: ../qml/Main.qml:495
 msgid "水匠5"
 msgstr ""
 
-#: ../qml/Main.qml:504
+#: ../qml/Main.qml:508
 msgid "エンジンパス(空=同梱の将棋エンジン)"
 msgstr ""
 
-#: ../qml/Main.qml:507
+#: ../qml/Main.qml:511
 msgid "スレッド"
 msgstr ""
 
-#: ../qml/Main.qml:513 ../qml/Main.qml:752
+#: ../qml/Main.qml:517 ../qml/Main.qml:756
 msgid "中止"
 msgstr ""
 
-#: ../qml/Main.qml:518
+#: ../qml/Main.qml:522
 msgid "開始"
 msgstr ""
 
-#: ../qml/Main.qml:559
+#: ../qml/Main.qml:563
 msgid "手目"
 msgstr ""
 
-#: ../qml/Main.qml:559
+#: ../qml/Main.qml:563
 msgid "終局評価"
 msgstr ""
 
-#: ../qml/Main.qml:560
+#: ../qml/Main.qml:564
 msgid "最大先手"
 msgstr ""
 
-#: ../qml/Main.qml:561
+#: ../qml/Main.qml:565
 msgid "最大後手"
 msgstr ""
 
-#: ../qml/Main.qml:583
+#: ../qml/Main.qml:587
 msgid ""
 "左=初手 → 右=終局。上=先手有利。目盛は300点刻みの駒得 (詰みは上限で截み)。グ"
 "ラフをタップで手目の詳細"
 msgstr ""
 
-#: ../qml/Main.qml:704
+#: ../qml/Main.qml:708
 msgid "手数"
 msgstr ""
 
-#: ../qml/Main.qml:706
+#: ../qml/Main.qml:710
 msgid "評価"
 msgstr ""
 
-#: ../qml/Main.qml:724
+#: ../qml/Main.qml:728
 msgid "その手目へ"
 msgstr ""
 
-#: ../qml/Main.qml:744
+#: ../qml/Main.qml:748
 msgid "再生成中 "
 msgstr ""
 
-#: ../qml/Main.qml:745
+#: ../qml/Main.qml:749
 msgid "この棋譜の評価値が未記録です (再生成 約1.2秒/局面)"
 msgstr ""
 
-#: ../qml/Main.qml:752
+#: ../qml/Main.qml:756
 msgid "再生成"
 msgstr ""
 
-#: ../qml/Main.qml:775
+#: ../qml/Main.qml:779
 msgid "書き出し (保存先选择ダイアログへ転送)"
 msgstr ""
 
-#: ../qml/Main.qml:782
+#: ../qml/Main.qml:786
 msgid "KIF保存"
 msgstr ""
 
-#: ../qml/Main.qml:792
+#: ../qml/Main.qml:796
 msgid "SFEN保存"
 msgstr ""
 
-#: ../qml/Main.qml:802
+#: ../qml/Main.qml:806
 msgid "読み込み"
 msgstr ""
 
-#: ../qml/Main.qml:807
+#: ../qml/Main.qml:811
 msgid "棋譜ファイルを選ぶ (*.kif / *.sfen)…"
 msgstr ""
 
-#: ../qml/Main.qml:869
+#: ../qml/Main.qml:873
 msgid "書き出し先"
 msgstr ""
 
-#: ../qml/Main.qml:869
+#: ../qml/Main.qml:873
 msgid "棋譜を開く"
 msgstr ""
 
-#: ../qml/Main.qml:904
+#: ../qml/Main.qml:908
 msgid "棋譜を読み込めませんでした"
 msgstr ""
