@@ -398,16 +398,21 @@ MainView {
         title: i18n.tr('この局面から続けますか？')
         // 取込棋譜/二面打ちからはCPU対戦へ切り替えられる (エンジン設定は対話画面の値を再利用)
         function startCpuBranch(engineAsSente) {
+            console.log('branch: cpu mode sentAsSente=' + engineAsSente
+                        + ' ready=' + game.engineReady() + ' color=' + game.engineColor)
             if (!game.engineReady()) {
                 const engIds = ['', 'suisho5', 'tsuyou11']
                 const engId = engIds[engineSeg.selectedIndex]
                 const hash = engineSeg.selectedIndex === 0 ? 128 : 512
                 if (!game.ensureEngine(enginePathField.text, engId, threadsField.value, hash)) {
+                    console.log('branch: ensureEngine failed engId=' + engId)
                     branchDialog.close()
                     return
                 }
             }
-            if (game.branchFromView(engineAsSente ? 0 : 1)) branchDialog.close()
+            const ok = game.branchFromView(engineAsSente ? 0 : 1)
+            console.log('branch: branchFromView=' + ok + ' color=' + game.engineColor)
+            if (ok) branchDialog.close()
         }
         Text {
             text: game.viewPly + i18n.tr('手目以降の棋譜は破棄され、この局面が最新になります (時計はそのまま)')

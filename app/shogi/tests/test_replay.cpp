@@ -137,6 +137,21 @@ int main(int argc, char** argv)
         t.stop();
         check(game.engine()->property("thinking").toBool(), "CPU対局へ切替えてエンジン思考中");
     }
+    // 分岐局面でエンジンが実際に着手すること (検討→対局goの引き継ぎが壊れると永久に無手指)
+    {
+        QEventLoop loop;
+        QTimer t;
+        int waited = 0;
+        QObject::connect(&t, &QTimer::timeout, [&] {
+            waited += 200;
+            if (game.ply() > 3 || waited > 150000) loop.quit();
+        });
+        t.start(200);
+        loop.exec();
+        t.stop();
+        check(game.ply() == 4, QStringLiteral("分岐後にCPUが着手 (ply=%1)").arg(game.ply()));
+        check(!game.over(), "CPU着手後も対局中");
+    }
 
     qInfo() << "replay test done, failures:" << failures;
     return failures == 0 ? 0 : 1;

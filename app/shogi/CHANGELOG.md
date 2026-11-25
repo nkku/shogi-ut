@@ -36,6 +36,12 @@
   エンジンが未起動でも対話画面の設定 (エンジン種別・スレッド数等) で自動起動する。
   CPU対局中からの分岐は従来どおり対局モードを維持。Game::ensureEngine /
   engineReady追加。未起動時でも readyChanged で思考が開始される。
+- (CPU対戦へ切り替えても指さない不具合) 「ここから指す」で走行中の検討を止める際
+  searchKind_ を SearchNone に潰していたため、bestmove 収斂時の onSearchFinished が
+  early-return し、待たせた対局go (pendingThink_) が永遠に発行されなかった。
+  →kind を保持したまま stop するよう修正。併せて onBestMove が再生成探索の bestmove を
+  対局手として適用してしまう経路を塞いだ (過去局面の探索手が実戦に紛れ込む事故防止)。
+  test_replay に「CPU切替後、エンジンが実際に着手する」回帰テストを追加。
 - tests/test_replay.cpp追加: KIF取込→再生成完了→canReplay=false→gotoPly→
   branchFromView→着手可能な全流れを docker (tsuyou11エンジン) で検証。
   ※既存の docker test_game は engineId なし起動で NNUE評価ファイルが見つからず

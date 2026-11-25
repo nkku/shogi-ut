@@ -1,6 +1,7 @@
 #include "game.h"
 #include "kifu/kifu.h"
 #include <QCoreApplication>
+#include <QDebug>
 #include <QDateTime>
 #include <QFile>
 #include <QFileInfo>
@@ -517,10 +518,10 @@ bool Game::branchFromView(int engineMode)
     const int keep = viewPly_;
     if (replayPly_ > 0 || pendingReplayStart_)
         stopReplay();
-    if (engine_.thinking() && searchKind_ == SearchAnalysis) {
-        searchKind_ = SearchNone;            // 走行中の検討結果は破棄する
-        engine_.stop();
-    }
+    if (engine_.thinking() && searchKind_ == SearchAnalysis)
+        engine_.stop();              // 走行中の検討結果は破棄。kind は残す (kind が
+                                     // SearchNone だと onSearchFinished が early-return し、
+                                     // pendingThink_ の対局goが永遠に発行されない)
     usiMoves_ = usiMoves_.mid(0, keep);
     while (!curve_.isEmpty() && curve_.lastKey() > keep)
         curve_.remove(curve_.lastKey());
@@ -537,6 +538,9 @@ bool Game::branchFromView(int engineMode)
         else if (engineLabel_.isEmpty()) engineLabel_ = engine_.engineName();
     }
     const int t = int(board_.turn());
+    qWarning().noquote() << "[branch] keep=" << keep << "mode=" << engineMode
+                         << "turn=" << t << "ready=" << engine_.ready()
+                         << "thinking=" << engine_.thinking();
     if (clock_[t] <= 0) {
         clock_[t] = byomiMs_ > 0 ? byomiMs_ : 60 * 1000;
         inByomi_[t] = byomiMs_ > 0;
@@ -800,8 +804,9 @@ void Game::startThink()
     if (engineColor_ < 0 || over_) return;
     if (viewPly_ >= 0) return;               // 閲覧中はgoを発行しない (復帰時に再試行)
     if (int(board_.turn()) != engineColor_) return;
-    if (!engine_.ready()) { updateStatus(); return; } // readyChangedで再試行
+    if (!engine_.ready()) { qWarning("[think] not ready yet"); updateStatus(); return; } // readyChangedで再試行
     if (engine_.thinking()) {
+        qWarning().noquote() << "[think] busy kind=" << int(searchKind_) << "-> pending";
         if (searchKind_ == SearchGame) return;         // 対局探索は継続中
         // 検討中/状態不明: stopしてbestmove到着後にgoを延期発行 (stopせず放置すると
         // エンジンが永久に次のgoを受け付けない=サイレントパスになる)
@@ -817,6 +822,8 @@ void Game::startThink()
     int b = inByomi_[0] ? 0 : clockMs(0);
     int w = inByomi_[1] ? 0 : clockMs(1);
     applyMultiPv(1);   // 対局探索は常に最善手1本 (MultiPV=2は検討専用)
+    qWarning().noquote() << "[think] go ply=" << searchPly_ << "b=" << b << "w=" << w
+                         << "byomi=" << byomiMs_;
     engine_.think(startSfen_, usiMoves_, b, w, byomiMs_);
     updateStatus();
 }
@@ -1115,10 +1122,15 @@ void Game::onEngineReadyChanged()
 
 void Game::onBestMove(const QString& usi)
 {
-    // 学習検討の bestmove は情報収集用。確定・対局go切替は thinkingChanged 側で行う
-    if (searchKind_ == SearchAnalysis) return;
-    if (over_ || engineColor_ < 0 || int(board_.turn()) != engineColor_)
+    // 学習検討・再生成探索の bestmove は情報収集用 (着手適用は対局go 전용)。
+    // 再生成中にこれを適用すると過去局面の探索手が対局手に化けるため必ず握る。
+    if (searchKind_ == SearchAnalysis || searchKind_ == SearchReplay) return;
+    if (over_ || engineColor_ < 0 || int(board_.turn()) != engineColor_) {
+        qWarning().noquote() << "[bestmove] dropped" << usi << "over=" << over_
+                             << "color=" << engineColor_ << "turn=" << int(board_.turn())
+                             << "kind=" << int(searchKind_);
         return;
+    }
     // 対局探索の収斂: 着手を適用する前にこの局面の評価を曲線へ確定する
     if (searchKind_ == SearchGame) {
         commitEval();
