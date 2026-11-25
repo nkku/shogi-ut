@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: shogi.ow\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-25 10:39+0000\n"
+"POT-Creation-Date: 2026-11-25 10:55+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,7 +33,7 @@ msgstr ""
 msgid "投了"
 msgstr ""
 
-#: ../qml/Main.qml:92 ../qml/Main.qml:774
+#: ../qml/Main.qml:92 ../qml/Main.qml:779
 msgid "棋譜"
 msgstr ""
 
@@ -45,176 +45,176 @@ msgstr ""
 msgid "手目閲覧"
 msgstr ""
 
-#: ../qml/Main.qml:368
+#: ../qml/Main.qml:373
 msgid "成りますか？"
 msgstr ""
 
-#: ../qml/Main.qml:373
+#: ../qml/Main.qml:378
 msgid "成る"
 msgstr ""
 
-#: ../qml/Main.qml:379
+#: ../qml/Main.qml:384
 msgid "不成"
 msgstr ""
 
-#: ../qml/Main.qml:389
+#: ../qml/Main.qml:394
 msgid "対局終了"
 msgstr ""
 
-#: ../qml/Main.qml:401 ../qml/Main.qml:764 ../qml/Main.qml:828
+#: ../qml/Main.qml:406 ../qml/Main.qml:769 ../qml/Main.qml:833
 msgid "閉じる"
 msgstr ""
 
-#: ../qml/Main.qml:413 ../qml/Main.qml:549
+#: ../qml/Main.qml:418 ../qml/Main.qml:554
 msgid "評価値グラフ"
 msgstr ""
 
-#: ../qml/Main.qml:424
+#: ../qml/Main.qml:429
 msgid "対局を始める"
 msgstr ""
 
-#: ../qml/Main.qml:436
+#: ../qml/Main.qml:441
 msgid "新しい対局"
 msgstr ""
 
-#: ../qml/Main.qml:440
+#: ../qml/Main.qml:445
 msgid "モード"
 msgstr ""
 
-#: ../qml/Main.qml:446
+#: ../qml/Main.qml:451
 msgid "CPU先手"
 msgstr ""
 
-#: ../qml/Main.qml:446
+#: ../qml/Main.qml:451
 msgid "CPU後手"
 msgstr ""
 
-#: ../qml/Main.qml:446
+#: ../qml/Main.qml:451
 msgid "二面打ち"
 msgstr ""
 
-#: ../qml/Main.qml:460
+#: ../qml/Main.qml:465
 msgid "学習モード (最善手・次善手のヒント)"
 msgstr ""
 
-#: ../qml/Main.qml:466
+#: ../qml/Main.qml:471
 msgid "持時間(分)"
 msgstr ""
 
-#: ../qml/Main.qml:481
+#: ../qml/Main.qml:486
 msgid "秒読み"
 msgstr ""
 
-#: ../qml/Main.qml:485
+#: ../qml/Main.qml:490
 msgid "CPU戦のみの設定"
 msgstr ""
 
-#: ../qml/Main.qml:489
+#: ../qml/Main.qml:494
 msgid "エンジン"
 msgstr ""
 
-#: ../qml/Main.qml:495
+#: ../qml/Main.qml:500
 msgid "つようら王11"
 msgstr ""
 
-#: ../qml/Main.qml:495
+#: ../qml/Main.qml:500
 msgid "やねうら王"
 msgstr ""
 
-#: ../qml/Main.qml:495
+#: ../qml/Main.qml:500
 msgid "水匠5"
 msgstr ""
 
-#: ../qml/Main.qml:508
+#: ../qml/Main.qml:513
 msgid "エンジンパス(空=同梱の将棋エンジン)"
 msgstr ""
 
-#: ../qml/Main.qml:511
+#: ../qml/Main.qml:516
 msgid "スレッド"
 msgstr ""
 
-#: ../qml/Main.qml:517 ../qml/Main.qml:756
+#: ../qml/Main.qml:522 ../qml/Main.qml:761
 msgid "中止"
 msgstr ""
 
-#: ../qml/Main.qml:522
+#: ../qml/Main.qml:527
 msgid "開始"
 msgstr ""
 
-#: ../qml/Main.qml:563
+#: ../qml/Main.qml:568
 msgid "手目"
 msgstr ""
 
-#: ../qml/Main.qml:563
+#: ../qml/Main.qml:568
 msgid "終局評価"
 msgstr ""
 
-#: ../qml/Main.qml:564
+#: ../qml/Main.qml:569
 msgid "最大先手"
 msgstr ""
 
-#: ../qml/Main.qml:565
+#: ../qml/Main.qml:570
 msgid "最大後手"
 msgstr ""
 
-#: ../qml/Main.qml:587
+#: ../qml/Main.qml:592
 msgid ""
 "左=初手 → 右=終局。上=先手有利。目盛は300点刻みの駒得 (詰みは上限で截み)。グ"
 "ラフをタップで手目の詳細"
 msgstr ""
 
-#: ../qml/Main.qml:708
+#: ../qml/Main.qml:713
 msgid "手数"
 msgstr ""
 
-#: ../qml/Main.qml:710
+#: ../qml/Main.qml:715
 msgid "評価"
 msgstr ""
 
-#: ../qml/Main.qml:728
+#: ../qml/Main.qml:733
 msgid "その手目へ"
 msgstr ""
 
-#: ../qml/Main.qml:748
+#: ../qml/Main.qml:753
 msgid "再生成中 "
 msgstr ""
 
-#: ../qml/Main.qml:749
+#: ../qml/Main.qml:754
 msgid "この棋譜の評価値が未記録です (再生成 約1.2秒/局面)"
 msgstr ""
 
-#: ../qml/Main.qml:756
+#: ../qml/Main.qml:761
 msgid "再生成"
 msgstr ""
 
-#: ../qml/Main.qml:779
+#: ../qml/Main.qml:784
 msgid "書き出し (保存先选择ダイアログへ転送)"
 msgstr ""
 
-#: ../qml/Main.qml:786
+#: ../qml/Main.qml:791
 msgid "KIF保存"
 msgstr ""
 
-#: ../qml/Main.qml:796
+#: ../qml/Main.qml:801
 msgid "SFEN保存"
 msgstr ""
 
-#: ../qml/Main.qml:806
+#: ../qml/Main.qml:811
 msgid "読み込み"
 msgstr ""
 
-#: ../qml/Main.qml:811
+#: ../qml/Main.qml:816
 msgid "棋譜ファイルを選ぶ (*.kif / *.sfen)…"
 msgstr ""
 
-#: ../qml/Main.qml:873
+#: ../qml/Main.qml:878
 msgid "書き出し先"
 msgstr ""
 
-#: ../qml/Main.qml:873
+#: ../qml/Main.qml:878
 msgid "棋譜を開く"
 msgstr ""
 
-#: ../qml/Main.qml:908
+#: ../qml/Main.qml:913
 msgid "棋譜を読み込めませんでした"
 msgstr ""

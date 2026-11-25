@@ -127,8 +127,13 @@ MainView {
                           ? game.viewPly + i18n.tr('手目閲覧') : (game.ply + 1) + '手目'
                     font.pixelSize: units.gu(1.8)
                     color: game.viewPly >= 0 ? '#c05050' : '#777777'
-                    tappable: game.viewPly >= 0          // 過去局面閲覧中: タップで最新へ
-                    onTap: game.gotoPly(-1)
+                    // LomiriのLabelにtappable/onTapはない (指定するとQMLロードが
+                    // 致命的エラーで白画面になる) のでMouseAreaで代用する
+                    MouseArea {
+                        anchors.fill: parent
+                        enabled: game.viewPly >= 0       // 過去局面閲覧中: タップで最新へ
+                        onClicked: game.gotoPly(-1)
+                    }
                 }
                 Item { Layout.fillWidth: true }
                 Label {
