@@ -31,6 +31,11 @@
   停止して結果を破棄、curveも分岐点以降を削除。commitEvalに分岐後の旧結果ガード追加。
 - 過去局面閲覧中は**時計を停止** (onTickでviewPly_>=0スキップ)。閲覧中の消費時間で
   時間負けする事故を防止。
+- 「ここから指す」で**対局モードを選択可能**に: 二面打ちや取込棋譜からの分岐では
+  「二面打ち / あなたが先手 / あなたが後手」から選べて、CPU対局への切り替え時に
+  エンジンが未起動でも対話画面の設定 (エンジン種別・スレッド数等) で自動起動する。
+  CPU対局中からの分岐は従来どおり対局モードを維持。Game::ensureEngine /
+  engineReady追加。未起動時でも readyChanged で思考が開始される。
 - tests/test_replay.cpp追加: KIF取込→再生成完了→canReplay=false→gotoPly→
   branchFromView→着手可能な全流れを docker (tsuyou11エンジン) で検証。
   ※既存の docker test_game は engineId なし起動で NNUE評価ファイルが見つからず

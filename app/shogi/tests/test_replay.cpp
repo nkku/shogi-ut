@@ -4,6 +4,7 @@
 #include "../src/kifu/kifu.h"
 #include "../src/shogi/board.h"
 #include <QCoreApplication>
+#include <QEventLoop>
 #include <QTemporaryDir>
 #include <QFile>
 #include <QTimer>
@@ -118,6 +119,24 @@ int main(int argc, char** argv)
     if (game.promoteAsked()) game.answerPromote(false);
     check(game.ply() == 4, QStringLiteral("分岐後に着手できる (ply=%1)").arg(game.ply()));
     check(game.canReplay(), "分岐で削られた先は again 再生成対象");
+
+    // --- 二面打ちからCPU対局へ切り替え分岐 (エンジン後手) ---
+    check(game.gotoPly(3), "gotoPly(3) (CPU切替用)");
+    check(game.branchFromView(1), "branchFromView(1)=エンジン後手");
+    check(game.engineColor() == 1, "分岐後 engineColor==1");
+    {   // エンジンがその局面から思考を開始することを確認
+        QEventLoop loop;
+        QTimer t;
+        int waited = 0;
+        QObject::connect(&t, &QTimer::timeout, [&] {
+            waited += 200;
+            if (game.engine()->property("thinking").toBool() || waited > 8000) loop.quit();
+        });
+        t.start(200);
+        loop.exec();
+        t.stop();
+        check(game.engine()->property("thinking").toBool(), "CPU対局へ切替えてエンジン思考中");
+    }
 
     qInfo() << "replay test done, failures:" << failures;
     return failures == 0 ? 0 : 1;

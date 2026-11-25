@@ -503,10 +503,17 @@ bool Game::gotoPly(int ply)
 // 閲覧中の手目から対局を続行: その手目以降の棋譜を破棄し、閲覧局面を最新局面にする。
 // 時計はそのまま (消費済み時間を戻さない) が、タイムアウト直後からの再開用に
 // 手番側のみ0時時計を秒読み分 (秒読みなしは1分) まで戻す。
-bool Game::branchFromView()
+// engineMode: -2=モード維持 (CPU対局からの分岐はこれでCPU対局のまま) /
+// -1=二面打ち / 0=エンジン先手 / 1=エンジン後手 (取込棋譜からCPUと指せるようにする)
+bool Game::branchFromView(int engineMode)
 {
     if (viewPly_ < 0) return false;
     if (searchKind_ == SearchGame && engine_.thinking()) return false;  // 閲覧中は起こり得ない
+    if (engineMode >= 0 && !engine_.running()) {
+        evalMessage_ = QStringLiteral("エンジンが起動していません。対話画面でエンジン設定を確認してください");
+        emit evalMessageChanged();
+        return false;
+    }
     const int keep = viewPly_;
     if (replayPly_ > 0 || pendingReplayStart_)
         stopReplay();
@@ -524,19 +531,43 @@ bool Game::branchFromView()
     clearSelection();
     clearHints();
     evalMessage_.clear();
+    if (engineMode >= -1) {
+        engineColor_ = engineMode;
+        if (engineColor_ < 0) engineLabel_.clear();
+        else if (engineLabel_.isEmpty()) engineLabel_ = engine_.engineName();
+    }
     const int t = int(board_.turn());
     if (clock_[t] <= 0) {
         clock_[t] = byomiMs_ > 0 ? byomiMs_ : 60 * 1000;
         inByomi_[t] = byomiMs_ > 0;
         ++clockTick_;
     }
+    lastTick_ = QDateTime::currentMSecsSinceEpoch();
+    tick_.start(200);                        // 终局 (endGame で停止) からの再開用
     emit evalCurveChanged();
     emit evalMessageChanged();
     emit ended();                            // over=false: QMLは結果表示を消すだけ
+    emit modeChanged();
     emit boardChanged();
     updateStatus();
     if (engineColor_ >= 0 && t == engineColor_) startThink();
     else maybeStartAnalysis();
+    return true;
+}
+
+bool Game::ensureEngine(const QString& enginePath, const QString& engineId,
+                        int threads, int hashMb)
+{
+    if (configureEngine(enginePath, engineId, threads, hashMb).isEmpty())
+        return false;
+    if (enginePath.isEmpty())
+        engineLabel_ = engineId == QStringLiteral("suisho5") ? QStringLiteral("水匠5")
+                   : engineId == QStringLiteral("tsuyou11") ? QStringLiteral("つようら王11mini")
+                   : QStringLiteral("やねうら王");
+    else
+        engineLabel_.clear();
+    engine_.newGame();
+    emit engineNameChanged();
     return true;
 }
 

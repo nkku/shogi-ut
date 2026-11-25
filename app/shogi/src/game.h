@@ -68,7 +68,12 @@ public:
     // 閲覧: 経過ply手目の局面へ盤面だけ巻き戻す (ply<0=最新へ復帰)
     Q_INVOKABLE bool gotoPly(int ply);
     // 閲覧中の手目から対局を続行: その手目以降の棋譜を破棄して最新局面化 (時計はそのまま)
-    Q_INVOKABLE bool branchFromView();
+    // engineMode: -2=現在のモードを維持 / -1=二面打ち / 0=エンジン先手 / 1=エンジン後手
+    Q_INVOKABLE bool branchFromView(int engineMode = -2);
+    // 分岐でCPU対局に切り替える際、エンジン未起動なら起動する (QML設定値を渡す)
+    Q_INVOKABLE bool ensureEngine(const QString& enginePath, const QString& engineId,
+                                  int threads, int hashMb);
+    Q_INVOKABLE bool engineReady() const { return engine_.ready(); }
     bool canReplay() const
     {
         if (replayPly_ > 0) return false;

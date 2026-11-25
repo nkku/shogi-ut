@@ -396,6 +396,19 @@ MainView {
     ModalCard {
         id: branchDialog
         title: i18n.tr('この局面から続けますか？')
+        // 取込棋譜/二面打ちからはCPU対戦へ切り替えられる (エンジン設定は対話画面の値を再利用)
+        function startCpuBranch(engineAsSente) {
+            if (!game.engineReady()) {
+                const engIds = ['', 'suisho5', 'tsuyou11']
+                const engId = engIds[engineSeg.selectedIndex]
+                const hash = engineSeg.selectedIndex === 0 ? 128 : 512
+                if (!game.ensureEngine(enginePathField.text, engId, threadsField.value, hash)) {
+                    branchDialog.close()
+                    return
+                }
+            }
+            if (game.branchFromView(engineAsSente ? 0 : 1)) branchDialog.close()
+        }
         Text {
             text: game.viewPly + i18n.tr('手目以降の棋譜は破棄され、この局面が最新になります (時計はそのまま)')
             font.pixelSize: units.gu(2)
@@ -403,6 +416,29 @@ MainView {
             Layout.fillWidth: true
         }
         RowLayout {
+            Layout.fillWidth: true
+            visible: game.engineColor < 0     // 二面打ち/取込棋譜: 続行モードを選ぶ
+            spacing: units.gu(0.5)
+            TapButton {
+                Layout.fillWidth: true
+                text: i18n.tr('二面打ち')
+                onClicked: { if (game.branchFromView(-1)) branchDialog.close() }
+            }
+            TapButton {
+                Layout.fillWidth: true
+                text: i18n.tr('あなたが先手')
+                baseColor: '#c9e8c1'
+                onClicked: branchDialog.startCpuBranch(false)   // エンジン後手
+            }
+            TapButton {
+                Layout.fillWidth: true
+                text: i18n.tr('あなたが後手')
+                baseColor: '#c9e8c1'
+                onClicked: branchDialog.startCpuBranch(true)    // エンジン先手
+            }
+        }
+        RowLayout {
+            visible: game.engineColor >= 0    // CPU対局中: モード維持で続行
             spacing: units.gu(1)
             TapButton {
                 text: i18n.tr('キャンセル')
@@ -410,10 +446,10 @@ MainView {
                 onClicked: branchDialog.close()
             }
             TapButton {
-                text: i18n.tr('続行')
-                baseColor: '#f7dcdc'
-                Layout.preferredWidth: units.gu(12)
-                onClicked: { branchDialog.close(); game.branchFromView() }
+                text: i18n.tr('この対局を続行')
+                baseColor: '#c9e8c1'
+                Layout.preferredWidth: units.gu(14)
+                onClicked: { if (game.branchFromView(-2)) branchDialog.close() }
             }
         }
     }
