@@ -67,6 +67,8 @@ public:
     int viewPly() const { return viewPly_; }                     // -1=最新局面, >=0=閲覧中の手数
     // 閲覧: 経過ply手目の局面へ盤面だけ巻き戻す (ply<0=最新へ復帰)
     Q_INVOKABLE bool gotoPly(int ply);
+    // 閲覧中の手目から対局を続行: その手目以降の棋譜を破棄して最新局面化 (時計はそのまま)
+    Q_INVOKABLE bool branchFromView();
     bool canReplay() const
     {
         if (replayPly_ > 0) return false;

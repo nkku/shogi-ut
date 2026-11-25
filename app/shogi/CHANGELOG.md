@@ -22,6 +22,19 @@
 - (実機白画面の修正) 手目ラベルの閲覧復帰をLabelのtappable/onTapで実装したが、
   Lomiri.ComponentsのLabelにそのプロパティがなく、QMLロードが致命的エラーに
   →MouseArea方式に変更。併せてデプロイ前にコンテナで qmlscene ロード確認を実施。
+- (再生成後に「未記録」表示が消えない不具合) 詰み上がり局面はエンジンが合法手なしで
+  infoなし即bestmoveを返すため最終plyの評価が記録されず canReplay が永遠に解除
+  されなかった → 合法手ゼロの局面は截み値 (mate ±1) を合成記録するよう修正。
+- 閲覧中に **「ここから指す」** (Game::branchFromView): 確認ダイアログ后经過ply以降の
+  棋譜を破棄して閲覧局面を最新化し、そのまま対局続行できる (時計は据え置き、
+  タイムアウト局面からの再開時のみ手番側に秒読み分を付与)。走行中の再生成/検討は
+  停止して結果を破棄、curveも分岐点以降を削除。commitEvalに分岐後の旧結果ガード追加。
+- 過去局面閲覧中は**時計を停止** (onTickでviewPly_>=0スキップ)。閲覧中の消費時間で
+  時間負けする事故を防止。
+- tests/test_replay.cpp追加: KIF取込→再生成完了→canReplay=false→gotoPly→
+  branchFromView→着手可能な全流れを docker (tsuyou11エンジン) で検証。
+  ※既存の docker test_game は engineId なし起動で NNUE評価ファイルが見つからず
+  エンジン即死 (タイムアウト勝ちで通っていた) でした。engineId=tsuyou11 必須に修正。
 
 ## 2026-11-24 — v1.0.1: 持時間7時間化・評価値グラフの目盛追加 (ユーザー使用感フィードバック)
 

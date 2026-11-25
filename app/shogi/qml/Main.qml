@@ -147,6 +147,31 @@ MainView {
                 }
             }
 
+            // ---- 閲覧操作 (グラフの「その手目へ」後に表示) ----
+            RowLayout {
+                Layout.fillWidth: true
+                visible: game.viewPly >= 0
+                spacing: units.gu(0.5)
+                Text {
+                    Layout.fillWidth: true
+                    text: game.viewPly + i18n.tr('手目を閲覧中 (時計は停止)')
+                    font.pixelSize: units.gu(1.7)
+                    color: '#c05050'
+                    elide: Text.ElideRight
+                }
+                TapButton {
+                    Layout.preferredWidth: units.gu(10)
+                    text: i18n.tr('最新へ')
+                    onClicked: game.gotoPly(-1)
+                }
+                TapButton {
+                    Layout.preferredWidth: units.gu(13)
+                    text: i18n.tr('ここから指す')
+                    baseColor: '#f7dcdc'
+                    onClicked: branchDialog.open()
+                }
+            }
+
             // ---- 上の持ち駒(相手側) ----
             HandRow {
                 Layout.fillWidth: true
@@ -363,6 +388,32 @@ MainView {
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.WordWrap
                 font.pixelSize: units.gu(2)
+            }
+        }
+    }
+
+    // ---- ここから指す (分岐) 確認 ----
+    ModalCard {
+        id: branchDialog
+        title: i18n.tr('この局面から続けますか？')
+        Text {
+            text: game.viewPly + i18n.tr('手目以降の棋譜は破棄され、この局面が最新になります (時計はそのまま)')
+            font.pixelSize: units.gu(2)
+            wrapMode: Text.WordWrap
+            Layout.fillWidth: true
+        }
+        RowLayout {
+            spacing: units.gu(1)
+            TapButton {
+                text: i18n.tr('キャンセル')
+                Layout.preferredWidth: units.gu(12)
+                onClicked: branchDialog.close()
+            }
+            TapButton {
+                text: i18n.tr('続行')
+                baseColor: '#f7dcdc'
+                Layout.preferredWidth: units.gu(12)
+                onClicked: { branchDialog.close(); game.branchFromView() }
             }
         }
     }
@@ -732,7 +783,7 @@ MainView {
                     visible: evalGraphDialog.inspectPly >= 0
                     text: i18n.tr('その手目へ')
                     baseColor: '#f0e6c8'
-                    onClicked: { game.gotoPly(evalGraphDialog.inspectPly); evalGraphDialog.close() }
+                    onClicked: { if (game.gotoPly(evalGraphDialog.inspectPly)) evalGraphDialog.close() }
                 }
             }
             Text {

@@ -500,6 +500,46 @@ bool Game::gotoPly(int ply)
     return true;
 }
 
+// 閲覧中の手目から対局を続行: その手目以降の棋譜を破棄し、閲覧局面を最新局面にする。
+// 時計はそのまま (消費済み時間を戻さない) が、タイムアウト直後からの再開用に
+// 手番側のみ0時時計を秒読み分 (秒読みなしは1分) まで戻す。
+bool Game::branchFromView()
+{
+    if (viewPly_ < 0) return false;
+    if (searchKind_ == SearchGame && engine_.thinking()) return false;  // 閲覧中は起こり得ない
+    const int keep = viewPly_;
+    if (replayPly_ > 0 || pendingReplayStart_)
+        stopReplay();
+    if (engine_.thinking() && searchKind_ == SearchAnalysis) {
+        searchKind_ = SearchNone;            // 走行中の検討結果は破棄する
+        engine_.stop();
+    }
+    usiMoves_ = usiMoves_.mid(0, keep);
+    while (!curve_.isEmpty() && curve_.lastKey() > keep)
+        curve_.remove(curve_.lastKey());
+    analysisDonePly_ = -1;
+    pendingThink_ = false;
+    over_ = false; resultText_.clear();
+    viewPly_ = -1;
+    clearSelection();
+    clearHints();
+    evalMessage_.clear();
+    const int t = int(board_.turn());
+    if (clock_[t] <= 0) {
+        clock_[t] = byomiMs_ > 0 ? byomiMs_ : 60 * 1000;
+        inByomi_[t] = byomiMs_ > 0;
+        ++clockTick_;
+    }
+    emit evalCurveChanged();
+    emit evalMessageChanged();
+    emit ended();                            // over=false: QMLは結果表示を消すだけ
+    emit boardChanged();
+    updateStatus();
+    if (engineColor_ >= 0 && t == engineColor_) startThink();
+    else maybeStartAnalysis();
+    return true;
+}
+
 bool Game::interactive() const
 {
     if (over_ || promoteAsked_) return false;
@@ -788,6 +828,10 @@ void Game::startReplay()
     if (usiMoves_.size() < 2 || searchKind_ == SearchGame || !engine_.ready()) {
         pendingReplayStart_ = false;
         studySuspend_ = false;     // pending経路で立てていた旗を戻す
+        if (usiMoves_.size() >= 2 && !engine_.ready() && searchKind_ != SearchGame) {
+            evalMessage_ = QStringLiteral("エンジンが起動していません。対局画面で学習モードをオンにして開始してください");
+            emit evalMessageChanged();
+        }
         return;
     }
     if (engine_.thinking()) {
@@ -827,6 +871,28 @@ void Game::stepReplay()
     }
     replayPly_ = p;
     setReplayProgress(QStringLiteral("%1/%2").arg(p).arg(replayTarget_));
+    // 詰み上がり局面はエンジンが合法手なしで即 bestmove (infoなし) を返すため
+    // 評価が記録されず canReplay が終わらない。截み値を合成して完了させる。
+    {
+        Board b;
+        bool ok = b.loadSfen(startSfen_.toLatin1().constData());
+        for (int i = 0; ok && i < p; ++i) {
+            Move m;
+            if (!Board::parseUsiMove(usiMoves_[i].toStdString(), m)) ok = false;
+            else b.make(m);
+        }
+        if (ok && b.legalMoves().empty()) {
+            EvalRec e;
+            // 手番側が詰まされている = 先手視点で mate = ±1 (絶対符号は不要だが1手差扱い)
+            e.mate = b.turn() == Sente ? -1 : 1;
+            e.depth = 1; e.valid = true;
+            curve_[p] = e;
+            emit evalCurveChanged();
+            replayPly_ = p + 1;
+            stepReplay();
+            return;
+        }
+    }
     searchKind_ = SearchReplay;
     searchPly_ = p;
     searchTurn_ = (startTurnOfSfen(startSfen_) + p) % 2;    // 探索視点の手番側
@@ -864,11 +930,12 @@ void Game::onSearchFinished()
             pendingReplayStart_ = false;    // stop完了 → 再生成開始
             startReplay();
         } else {
-            // stopReplay による中断
+            // stopReplay による中断 (branchFromView からの流しもここで回収)
             replayTarget_ = 0;
             studySuspend_ = false;
             setReplayProgress(QString());
-            maybeStartAnalysis();
+            if (pendingThink_) { pendingThink_ = false; startThink(); }
+            else maybeStartAnalysis();
         }
         return;
     }
@@ -967,6 +1034,10 @@ void Game::resetEvalState()
 void Game::commitEval()
 {
     if (!lastEval_.valid) return;
+    if (searchPly_ > usiMoves_.size()) {     // 分岐 (branchFromView) で truncade 済みの旧結果
+        lastEval_ = EvalRec();
+        return;
+    }
     const EvalRec raw = lastEval_;          // 探索視点の最新評価
     lastEval_ = EvalRec();
     // 中断由来でも、探索した局面(ply)の評価としては有効なので確定する
@@ -1095,6 +1166,7 @@ void Game::onTick()
     qint64 now = QDateTime::currentMSecsSinceEpoch();
     qint64 dt = now - lastTick_;
     lastTick_ = now;
+    if (viewPly_ >= 0) return;   // 過去局面閲覧中は時計を止める (閲覧時間で負け防止)
     if (promoteAsked_) return; // 成り確認中は時計を止める
 
     int t = int(board_.turn());
