@@ -501,77 +501,70 @@ bool Game::gotoPly(int ply)
     return true;
 }
 
-// 閲覧中の手目から対局を続行: その手目以降の棋譜を破棄し、閲覧局面を最新局面にする。
-// 時計はそのまま (消費済み時間を戻さない) が、タイムアウト直後からの再開用に
-// 手番側のみ0時時計を秒読み分 (秒読みなしは1分) まで戻す。
-// engineMode: -2=モード維持 (CPU対局からの分岐はこれでCPU対局のまま) /
-// -1=二面打ち / 0=エンジン先手 / 1=エンジン後手 (取込棋譜からCPUと指せるようにする)
-bool Game::branchFromView(int engineMode)
+// 閲覧中の手目から新規対局を開始: その手目以降の棋譜を破棄し、対局ダイアログで
+// 選んだ設定 (モード/エンジン/持時間/秒読み/学習) を適用して対戦を始める。
+// 時計は両者とも選んだ持時間でリセット (消費時間は引き継がない)。
+// engineMode: -1=二面打ち / 0=エンジン先手 / 1=エンジン後手
+bool Game::branchToGame(int ply, int engineMode, int mainSec, int byomiSec,
+                        const QString& enginePath, const QString& engineId,
+                        int threads, int hashMb, bool study)
 {
-    if (viewPly_ < 0) return false;
-    if (searchKind_ == SearchGame && engine_.thinking()) return false;  // 閲覧中は起こり得ない
-    if (engineMode >= 0 && !engine_.running()) {
-        evalMessage_ = QStringLiteral("エンジンが起動していません。対話画面でエンジン設定を確認してください");
+    if (ply < 0) return false;
+    if (viewPly_ < 0) {
+        if (!gotoPly(ply)) return false;       // 最新へ復帰済みなら再度巻き戻す
+    } else if (viewPly_ != ply) {
+        return false;
+    }
+    if (searchKind_ == SearchGame && engine_.thinking()) return false;
+    if (engineMode >= 0 && enginePathOrDefault(enginePath, engineId).isEmpty()) {
+        evalMessage_ = QStringLiteral("USIエンジンが見つかりません。設定を確認してください");
         emit evalMessageChanged();
         return false;
     }
-    const int keep = viewPly_;
+    // 分岐スナップショット (newGame* の初期化後に上書き復元する)
+    const QString sfen = startSfen_;
+    const QStringList moves = usiMoves_.mid(0, ply);
+    const Board board = board_;
+    QMap<int, EvalRec> curve;
+    for (auto it = curve_.constBegin(); it != curve_.constEnd(); ++it)
+        if (it.key() <= ply) curve.insert(it.key(), it.value());
     if (replayPly_ > 0 || pendingReplayStart_)
-        stopReplay();
-    if (engine_.thinking() && searchKind_ == SearchAnalysis)
-        engine_.stop();              // 走行中の検討結果は破棄。kind は残す (kind が
-                                     // SearchNone だと onSearchFinished が early-return し、
-                                     // pendingThink_ の対局goが永遠に発行されない)
-    usiMoves_ = usiMoves_.mid(0, keep);
-    while (!curve_.isEmpty() && curve_.lastKey() > keep)
-        curve_.remove(curve_.lastKey());
+        stopReplay();                          // 走行中の再生成を止める (setupGame は
+                                               // replayPly_/progress を初期化しないため)
+    pendingThink_ = false;
+    qWarning().noquote() << "[branch] to ply=" << ply << "mode=" << engineMode
+                         << "main=" << mainSec << "byomi=" << byomiSec << "study=" << study;
+
+    if (engineMode < 0)
+        newGameHuman(mainSec, byomiSec, study, enginePath, engineId, threads, hashMb);
+    else
+        newGameEngine(engineMode == 1 /*エンジン後手=人間先手*/, mainSec, byomiSec,
+                      enginePath, threads, hashMb, engineId, study);
+    if (over_) return false;               // エンジン不在など: 新規対局側で失敗表示済み
+
+    // 分岐局面を復元 (newGame* は平手開始にリセットするため)
+    startSfen_ = sfen;
+    usiMoves_ = moves;
+    board_ = board;
+    curve_ = curve;
+    viewPly_ = -1;
     analysisDonePly_ = -1;
     pendingThink_ = false;
-    over_ = false; resultText_.clear();
-    viewPly_ = -1;
-    clearSelection();
-    clearHints();
-    evalMessage_.clear();
-    if (engineMode >= -1) {
-        engineColor_ = engineMode;
-        if (engineColor_ < 0) engineLabel_.clear();
-        else if (engineLabel_.isEmpty()) engineLabel_ = engine_.engineName();
+    lastFrom_ = lastTo_ = NONE;
+    if (!moves.isEmpty()) {
+        Move m;
+        if (Board::parseUsiMove(moves.last().toStdString(), m)) {
+            lastFrom_ = m.from; lastTo_ = m.to;
+            emit lastMove(m.from, m.to);
+        }
     }
-    const int t = int(board_.turn());
-    qWarning().noquote() << "[branch] keep=" << keep << "mode=" << engineMode
-                         << "turn=" << t << "ready=" << engine_.ready()
-                         << "thinking=" << engine_.thinking();
-    if (clock_[t] <= 0) {
-        clock_[t] = byomiMs_ > 0 ? byomiMs_ : 60 * 1000;
-        inByomi_[t] = byomiMs_ > 0;
-        ++clockTick_;
-    }
-    lastTick_ = QDateTime::currentMSecsSinceEpoch();
-    tick_.start(200);                        // 终局 (endGame で停止) からの再開用
     emit evalCurveChanged();
-    emit evalMessageChanged();
-    emit ended();                            // over=false: QMLは結果表示を消すだけ
-    emit modeChanged();
     emit boardChanged();
     updateStatus();
-    if (engineColor_ >= 0 && t == engineColor_) startThink();
-    else maybeStartAnalysis();
-    return true;
-}
-
-bool Game::ensureEngine(const QString& enginePath, const QString& engineId,
-                        int threads, int hashMb)
-{
-    if (configureEngine(enginePath, engineId, threads, hashMb).isEmpty())
-        return false;
-    if (enginePath.isEmpty())
-        engineLabel_ = engineId == QStringLiteral("suisho5") ? QStringLiteral("水匠5")
-                   : engineId == QStringLiteral("tsuyou11") ? QStringLiteral("つようら王11mini")
-                   : QStringLiteral("やねうら王");
+    if (engineColor_ >= 0 && int(board_.turn()) == engineColor_)
+        startThink();                      // 未起動なら onEngineReadyChanged で発行
     else
-        engineLabel_.clear();
-    engine_.newGame();
-    emit engineNameChanged();
+        maybeStartAnalysis();
     return true;
 }
 
@@ -968,7 +961,7 @@ void Game::onSearchFinished()
             pendingReplayStart_ = false;    // stop完了 → 再生成開始
             startReplay();
         } else {
-            // stopReplay による中断 (branchFromView からの流しもここで回収)
+            // stopReplay による中断 (分岐や中断要求からの流しもここで回収)
             replayTarget_ = 0;
             studySuspend_ = false;
             setReplayProgress(QString());
@@ -1072,7 +1065,7 @@ void Game::resetEvalState()
 void Game::commitEval()
 {
     if (!lastEval_.valid) return;
-    if (searchPly_ > usiMoves_.size()) {     // 分岐 (branchFromView) で truncade 済みの旧結果
+    if (searchPly_ > usiMoves_.size()) {     // 分岐 (branchToGame) で truncade 済みの旧結果
         lastEval_ = EvalRec();
         return;
     }

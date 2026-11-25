@@ -168,7 +168,10 @@ MainView {
                     Layout.preferredWidth: units.gu(13)
                     text: i18n.tr('ここから指す')
                     baseColor: '#f7dcdc'
-                    onClicked: branchDialog.open()
+                    onClicked: {
+                        newGameDialog.branchPly = game.viewPly
+                        newGameDialog.open()
+                    }
                 }
             }
 
@@ -392,73 +395,6 @@ MainView {
         }
     }
 
-    // ---- ここから指す (分岐) 確認 ----
-    ModalCard {
-        id: branchDialog
-        title: i18n.tr('この局面から続けますか？')
-        // 取込棋譜/二面打ちからはCPU対戦へ切り替えられる (エンジン設定は対話画面の値を再利用)
-        function startCpuBranch(engineAsSente) {
-            console.log('branch: cpu mode sentAsSente=' + engineAsSente
-                        + ' ready=' + game.engineReady() + ' color=' + game.engineColor)
-            if (!game.engineReady()) {
-                const engIds = ['', 'suisho5', 'tsuyou11']
-                const engId = engIds[engineSeg.selectedIndex]
-                const hash = engineSeg.selectedIndex === 0 ? 128 : 512
-                if (!game.ensureEngine(enginePathField.text, engId, threadsField.value, hash)) {
-                    console.log('branch: ensureEngine failed engId=' + engId)
-                    branchDialog.close()
-                    return
-                }
-            }
-            const ok = game.branchFromView(engineAsSente ? 0 : 1)
-            console.log('branch: branchFromView=' + ok + ' color=' + game.engineColor)
-            if (ok) branchDialog.close()
-        }
-        Text {
-            text: game.viewPly + i18n.tr('手目以降の棋譜は破棄され、この局面が最新になります (時計はそのまま)')
-            font.pixelSize: units.gu(2)
-            wrapMode: Text.WordWrap
-            Layout.fillWidth: true
-        }
-        RowLayout {
-            Layout.fillWidth: true
-            visible: game.engineColor < 0     // 二面打ち/取込棋譜: 続行モードを選ぶ
-            spacing: units.gu(0.5)
-            TapButton {
-                Layout.fillWidth: true
-                text: i18n.tr('二面打ち')
-                onClicked: { if (game.branchFromView(-1)) branchDialog.close() }
-            }
-            TapButton {
-                Layout.fillWidth: true
-                text: i18n.tr('あなたが先手')
-                baseColor: '#c9e8c1'
-                onClicked: branchDialog.startCpuBranch(false)   // エンジン後手
-            }
-            TapButton {
-                Layout.fillWidth: true
-                text: i18n.tr('あなたが後手')
-                baseColor: '#c9e8c1'
-                onClicked: branchDialog.startCpuBranch(true)    // エンジン先手
-            }
-        }
-        RowLayout {
-            visible: game.engineColor >= 0    // CPU対局中: モード維持で続行
-            spacing: units.gu(1)
-            TapButton {
-                text: i18n.tr('キャンセル')
-                Layout.preferredWidth: units.gu(12)
-                onClicked: branchDialog.close()
-            }
-            TapButton {
-                text: i18n.tr('この対局を続行')
-                baseColor: '#c9e8c1'
-                Layout.preferredWidth: units.gu(14)
-                onClicked: { if (game.branchFromView(-2)) branchDialog.close() }
-            }
-        }
-    }
-
     // ---- 成り確認 ----
     ModalCard {
         id: promoteDialog
@@ -527,13 +463,24 @@ MainView {
         }
     }
 
-    // ---- 対局開始 ----
+    // ---- 対局開始 (閲覧中は「ここから指す」の分岐対局にも使用) ----
     ModalCard {
         id: newGameDialog
-        title: i18n.tr('新しい対局')
+        property int branchPly: -1      // >=0: その手目から分岐対局を開始
+        title: branchPly >= 0 ? i18n.tr('%1手目から対局').arg(branchPly)
+                              : i18n.tr('新しい対局')
+        onClosed: branchPly = -1
         ColumnLayout {
             spacing: units.gu(1)
 
+            Text {
+                visible: newGameDialog.branchPly >= 0
+                text: i18n.tr('%1手目以降の棋譜と消費時間は破棄され、選んだ設定で対局を開始します').arg(newGameDialog.branchPly)
+                font.pixelSize: units.gu(1.7)
+                color: '#c05050'
+                wrapMode: Text.WordWrap
+                Layout.fillWidth: true
+            }
             Text { text: i18n.tr('モード'); font.pixelSize: units.gu(2) }
             RowLayout {
                 id: modeSeg
@@ -623,6 +570,18 @@ MainView {
                         const engIds = ['', 'suisho5', 'tsuyou11']
                         const engId = engIds[engineSeg.selectedIndex]
                         const hash = engineSeg.selectedIndex === 0 ? 128 : 512
+                        if (newGameDialog.branchPly >= 0) {
+                            const mode = modeSeg.selectedIndex === 0 ? -1
+                                       : modeSeg.selectedIndex === 1 ? 0 : 1   // CPU先手=エンジン先手
+                            if (!game.branchToGame(newGameDialog.branchPly, mode,
+                                                   minutesField.value * 60, byomiField.value,
+                                                   enginePathField.text, engId,
+                                                   threadsField.value, hash, root.studyValue))
+                                return            // 失敗時は開いたまま (盤を触らせない)
+                            root.graphShownThisGame = false
+                            newGameDialog.close()
+                            return
+                        }
                         if (modeSeg.selectedIndex === 0)
                             game.newGameHuman(minutesField.value * 60, byomiField.value,
                                               root.studyValue, enginePathField.text, engId,

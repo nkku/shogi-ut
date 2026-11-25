@@ -1,5 +1,6 @@
-// 評価値グラフ再生成 + 閲覧からの分岐 (branchFromView) の統合テスト。
-// KIF取り込み → 再生成完了 → canReplay=false → その手目へ → ここから指す → 着手可能。
+// 評価値グラフ再生成 + 閲覧からの分岐対局 (branchToGame) の統合テスト。
+// KIF取り込み → 再生成完了 → canReplay=false → その手目へ → 二面打ち分岐 →
+// CPU(エンジン後手)分岐 → エンジン実着手。
 #include "../src/game.h"
 #include "../src/kifu/kifu.h"
 #include "../src/shogi/board.h"
@@ -109,9 +110,10 @@ int main(int argc, char** argv)
     check(game.viewPly() == -1 && game.ply() == 6, "復帰後 viewPly=-1 ply=6");
     check(game.gotoPly(3), "gotoPly(3) 再移動");
 
-    check(game.branchFromView(), "branchFromView");
+    check(game.branchToGame(3, -1, 600, 30), "branchToGame(3,二面打ち)");
     check(game.viewPly() == -1 && game.ply() == 3, "分岐後 ply==3");
     check(!game.over(), "分岐後は対局中");
+    check(game.engineColor() == -1, "分岐後 engineColor==-1 (二面打ち)");
 
     // 4手目 (3a2b 銀で角.take) を人間が指せること
     game.tapSquare(parseSq("3a"));
@@ -122,15 +124,17 @@ int main(int argc, char** argv)
 
     // --- 二面打ちからCPU対局へ切り替え分岐 (エンジン後手) ---
     check(game.gotoPly(3), "gotoPly(3) (CPU切替用)");
-    check(game.branchFromView(1), "branchFromView(1)=エンジン後手");
+    check(game.branchToGame(3, 1, 120, 0, QString::fromLocal8Bit(argv[1]), engineId, 2, 512, true),
+          "branchToGame(3,エンジン後手)");
     check(game.engineColor() == 1, "分岐後 engineColor==1");
+    check(game.ply() == 3 && !game.over(), "CPU分岐後 ply==3 対局中");
     {   // エンジンがその局面から思考を開始することを確認
         QEventLoop loop;
         QTimer t;
         int waited = 0;
         QObject::connect(&t, &QTimer::timeout, [&] {
             waited += 200;
-            if (game.engine()->property("thinking").toBool() || waited > 8000) loop.quit();
+            if (game.engine()->property("thinking").toBool() || waited > 15000) loop.quit();
         });
         t.start(200);
         loop.exec();
@@ -144,7 +148,7 @@ int main(int argc, char** argv)
         int waited = 0;
         QObject::connect(&t, &QTimer::timeout, [&] {
             waited += 200;
-            if (game.ply() > 3 || waited > 150000) loop.quit();
+            if (game.ply() > 3 || waited > 120000) loop.quit();
         });
         t.start(200);
         loop.exec();
