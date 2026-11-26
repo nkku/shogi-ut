@@ -22,7 +22,7 @@ Rectangle {
     Text {
         x: units.gu(0.7)
         y: units.gu(0.25)
-        text: (tray.owner === 0 ? '先手' : '後手') + 'の持ち駒'
+        text: (tray.owner === 0 ? i18n.tr('先手') : i18n.tr('後手')) + i18n.tr('の持ち駒')
         font.pixelSize: units.gu(1.2)
         color: '#826745'
     }

@@ -1,0 +1,367 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: shogi.ow\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "先手"
+msgstr "Sente"
+
+msgid "後手"
+msgstr "Gote"
+
+msgid "の持ち駒"
+msgstr "'s pieces in hand"
+
+msgid "将棋"
+msgstr "Shogi"
+
+msgid "対局"
+msgstr "Game"
+
+msgid "待った"
+msgstr "Undo"
+
+msgid "投了"
+msgstr "Resign"
+
+msgid "棋譜"
+msgstr "Moves"
+
+msgid "グラフ"
+msgstr "Graph"
+
+msgid "音"
+msgstr "Sound"
+
+msgid "消"
+msgstr "Mute"
+
+msgid "後手 "
+msgstr "Gote "
+
+msgid "先手 "
+msgstr "Sente "
+
+msgid "%1手目閲覧"
+msgstr "Viewing move %1"
+
+msgid "%1手目"
+msgstr "Move %1"
+
+msgid "手目を閲覧中 (時計は停止)"
+msgstr "Reviewing a move (clock paused)"
+
+msgid "最新へ"
+msgstr "To latest"
+
+msgid "ここから指す"
+msgstr "Play from here"
+
+msgid "成りますか？"
+msgstr "Promote?"
+
+msgid "成る"
+msgstr "Promote"
+
+msgid "不成"
+msgstr "Don't promote"
+
+msgid "対局終了"
+msgstr "Game over"
+
+msgid "閉じる"
+msgstr "Close"
+
+msgid "評価値グラフ"
+msgstr "Evaluation graph"
+
+msgid "対局を始める"
+msgstr "Start a game"
+
+msgid "%1手目から対局"
+msgstr "Start from move %1"
+
+msgid "新しい対局"
+msgstr "New game"
+
+msgid "%1手目以降の棋譜と消費時間は破棄され、選んだ設定で対局を開始します"
+msgstr "The moves and clock after move %1 will be discarded, then the game starts with the chosen settings"
+
+msgid "モード"
+msgstr "Mode"
+
+msgid "二面打ち"
+msgstr "Two players"
+
+msgid "CPU先手"
+msgstr "Engine (Sente)"
+
+msgid "CPU後手"
+msgstr "Engine (Gote)"
+
+msgid "学習モード (最善手・次善手のヒント)"
+msgstr "Study mode (best & second-best hints)"
+
+msgid "持時間(分)"
+msgstr "Time (min)"
+
+msgid "時間"
+msgstr "h"
+
+msgid "分"
+msgstr "m"
+
+msgid "秒読み"
+msgstr "Byo-yomi"
+
+msgid "CPU戦のみの設定"
+msgstr "Engine game settings only"
+
+msgid "エンジン"
+msgstr "Engine"
+
+msgid "やねうら王"
+msgstr "YaneuraOu"
+
+msgid "水匠5"
+msgstr "Suisho5"
+
+msgid "つようら王11"
+msgstr "TsuyouraOu 11"
+
+msgid "エンジンパス(空=同梱の将棋エンジン)"
+msgstr "Engine path (empty = bundled engine)"
+
+msgid "スレッド"
+msgstr "Threads"
+
+msgid "中止"
+msgstr "Cancel"
+
+msgid "開始"
+msgstr "Start"
+
+msgid "終局評価"
+msgstr "Final eval"
+
+msgid "手目"
+msgstr "Move"
+
+msgid "最大先手"
+msgstr "Max sente"
+
+msgid "最大後手"
+msgstr "Max gote"
+
+msgid "左=初手 → 右=終局。上=先手有利。目盛は300点刻みの駒得 (詰みは上限で截み)。グラフをタップで手目の詳細"
+msgstr "Left = start, right = game end. Up = sente advantage. Scale = material in 300-pt steps (mate scores clamped). Tap the graph for move details"
+
+msgid "評価データがありません"
+msgstr "No evaluation data"
+
+msgid "手数"
+msgstr "Ply"
+
+msgid "評価"
+msgstr "Eval"
+
+msgid "その手目へ"
+msgstr "Go to this move"
+
+msgid "再生成中 "
+msgstr "Regenerating "
+
+msgid "この棋譜の評価値が未記録です (再生成 約1.2秒/局面)"
+msgstr "No evaluations recorded for this game (~1.2 s per position to regenerate)"
+
+msgid "再生成"
+msgstr "Regenerate"
+
+msgid "書き出し (保存先选择ダイアログへ転送)"
+msgstr "Export (opens the save dialog)"
+
+msgid "KIF保存"
+msgstr "Save KIF"
+
+msgid "SFEN保存"
+msgstr "Save SFEN"
+
+msgid "読み込み"
+msgstr "Load"
+
+msgid "棋譜ファイルを選ぶ (*.kif / *.sfen)…"
+msgstr "Choose game file (*.kif / *.sfen)…"
+
+msgid "書き出し先"
+msgstr "Save to"
+
+msgid "棋譜を開く"
+msgstr "Open game"
+
+msgid "棋譜を読み込めませんでした"
+msgstr "Could not load the game"
+
+msgid "先手が時間切れ — 後手の勝ち"
+msgstr "Sente ran out of time — Gote wins"
+
+msgid "エンジンが見つからず学習モード off"
+msgstr "Engine not found; study mode off"
+
+msgid "つようら王11mini"
+msgstr "TsuyouraOu 11 mini"
+
+msgid "初局面を復元できませんでした"
+msgstr "Could not restore the starting position"
+
+msgid "書き込めません: "
+msgstr "Cannot write: "
+
+msgid "ファイルが開けません: "
+msgstr "Cannot open file: "
+
+msgid "初局面を復元できません"
+msgstr "Could not restore the starting position"
+
+msgid "不明な駒: "
+msgstr "Unknown piece: "
+
+msgid "不正な手: "
+msgstr "Illegal move: "
+
+msgid "第%1手を解釈できません: %2"
+msgstr "Could not interpret move %1: %2"
+
+msgid "第%1手の形式が不正: %2"
+msgstr "Bad move format at move %1: %2"
+
+msgid "第%1手が不正: %2"
+msgstr "Illegal move %1: %2"
+
+msgid "%1手 読み込みました"
+msgstr "Loaded %1 moves"
+
+msgid "USIエンジンが見つかりません。設定を確認してください"
+msgstr "USI engine not found. Check Settings."
+
+msgid "入玉勝ち — %1 (%2-%3点)"
+msgstr "Entering-king win — %1 (%2-%3 pts)"
+
+msgid "持将棋 (引き分け, %1-%2点)"
+msgstr "Jishogi draw, %1-%2 pts"
+
+msgid "エンジンが起動していません。対局画面で学習モードをオンにして開始してください"
+msgstr "Engine is not running. Turn on study mode on the game screen and press Start"
+
+msgid "最善手"
+msgstr "Best"
+
+msgid "次善手"
+msgstr "2nd best"
+
+msgid "あなたの指し手"
+msgstr "Your move"
+
+msgid " (%1%2点)"
+msgstr " (%1%2 pts)"
+
+msgid "得"
+msgstr "gain"
+
+msgid "損"
+msgstr "loss"
+
+msgid "不正な指し手(%1) — %2"
+msgstr "Illegal move (%1) — %2"
+
+msgid " を検討中…"
+msgstr " is analyzing…"
+
+msgid " が思考中…"
+msgstr " is thinking…"
+
+msgid "の番"
+msgstr " to move"
+
+msgid "(王手!)"
+msgstr " (Check!)"
+
+msgid "エンジン起動中…"
+msgstr "Starting engine…"
+
+msgid "+詰%1"
+msgstr "+M%1"
+
+msgid "-詰%1"
+msgstr "-M%1"
+
+msgid "平手以外の駒落ちには対応していません"
+msgstr "Handicaps other than hirate (even game) are not supported"
+
+msgid "%1行目を解析できません: %2"
+msgstr "Could not parse line %1: %2"
+
+msgid "先頭に『同』があります"
+msgstr "The first move line starts with \"same\""
+
+msgid "%1行目の駒が判別できません: %2"
+msgstr "Could not identify the piece on line %1: %2"
+
+msgid "指し手がありませんでした"
+msgstr "No moves found"
+
+msgid "SFENが壊れています"
+msgstr "Malformed SFEN"
+
+msgid "プロセスエラー: %1 (%2)"
+msgstr "Process error: %1 (%2)"
+
+msgid "起動失敗: %1"
+msgstr "Failed to start: %1"
+
+msgid "先手の勝ち"
+msgstr "Sente wins"
+
+msgid "投了 — 先手の勝ち"
+msgstr "Resignation — Sente wins"
+
+msgid "詰み — 先手の勝ち"
+msgstr "Checkmate — Sente wins"
+
+msgid "連続王手の千日手 — 先手の勝ち"
+msgstr "Perpetual check — Sente wins"
+
+msgid "相手が投了 — 先手の勝ち"
+msgstr "Opponent resigned — Sente wins"
+
+msgid "後手の勝ち"
+msgstr "Gote wins"
+
+msgid "投了 — 後手の勝ち"
+msgstr "Resignation — Gote wins"
+
+msgid "詰み — 後手の勝ち"
+msgstr "Checkmate — Gote wins"
+
+msgid "連続王手の千日手 — 後手の勝ち"
+msgstr "Perpetual check — Gote wins"
+
+msgid "相手が投了 — 後手の勝ち"
+msgstr "Opponent resigned — Gote wins"
+
+msgid "後手が時間切れ — 先手の勝ち"
+msgstr "Gote ran out of time — Sente wins"
+
+msgid "千日手"
+msgstr "Repetition draw"
+
+msgid "USIエンジンが見つかりません。設定でパスを指定してください。"
+msgstr "USI engine not found. Set the path in Settings."
+
+msgid "エンジンが指し手を返さないため反則負けとしました"
+msgstr "The engine returned no move; the game is a forfeit"
+
+msgid "相手が入玉勝ちを宣言"
+msgstr "Opponent declared an entering-king win"

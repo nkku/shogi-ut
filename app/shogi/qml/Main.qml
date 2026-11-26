@@ -102,7 +102,7 @@ MainView {
                 }
                 TapButton {
                     Layout.fillWidth: true
-                    text: root.soundOn ? '音' : '消'
+                    text: root.soundOn ? i18n.tr('音') : i18n.tr('消')
                     baseColor: root.soundOn ? '#c9e8c1' : '#e8e8e8'
                     onClicked: root.soundOn = !root.soundOn
                 }
@@ -116,7 +116,7 @@ MainView {
                     text: {
                         root.boardRevision
                         const t = game.flipped ? 0 : 1
-                        return (t === 1 ? '後手 ' : '先手 ') + game.clockText(t)
+                        return (t === 1 ? i18n.tr('後手 ') : i18n.tr('先手 ')) + game.clockText(t)
                     }
                     font.pixelSize: units.gu(2)
                 }
@@ -124,7 +124,7 @@ MainView {
                 Label {
                     objectName: 'ply-label'
                     text: game.viewPly >= 0
-                          ? game.viewPly + i18n.tr('手目閲覧') : (game.ply + 1) + '手目'
+                          ? i18n.tr('%1手目閲覧').arg(game.viewPly) : i18n.tr('%1手目').arg(game.ply + 1)
                     font.pixelSize: units.gu(1.8)
                     color: game.viewPly >= 0 ? '#c05050' : '#777777'
                     // LomiriのLabelにtappable/onTapはない (指定するとQMLロードが
@@ -141,7 +141,7 @@ MainView {
                     text: {
                         root.boardRevision
                         const t = game.flipped ? 1 : 0
-                        return (t === 1 ? '後手 ' : '先手 ') + game.clockText(t)
+                        return (t === 1 ? i18n.tr('後手 ') : i18n.tr('先手 ')) + game.clockText(t)
                     }
                     font.pixelSize: units.gu(2)
                 }
@@ -515,8 +515,8 @@ MainView {
                 }
                 Text {
                     visible: minutesField.value >= 60
-                    text: Math.floor(minutesField.value / 60) + '時間'
-                          + (minutesField.value % 60 ? (minutesField.value % 60) + '分' : '')
+                    text: Math.floor(minutesField.value / 60) + i18n.tr('時間')
+                          + (minutesField.value % 60 ? (minutesField.value % 60) + i18n.tr('分') : '')
                     font.pixelSize: units.gu(1.6)
                     color: '#666666'
                 }
@@ -687,7 +687,7 @@ MainView {
                             ctx.textAlign = 'center'
                             ctx.textBaseline = 'middle'
                             ctx.font = String(Math.round(units.gu(1.8))) + 'px sans-serif'
-                            ctx.fillText('評価データがありません', width / 2, height / 2)
+                            ctx.fillText(i18n.tr('評価データがありません'), width / 2, height / 2)
                             return
                         }
                         // x軸: 手数ラベル (総手数に応じて刻みを変更)

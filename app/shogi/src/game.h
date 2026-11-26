@@ -6,6 +6,7 @@
 #include <QMap>
 #include "shogi/board.h"
 #include "engine/usiengine.h"
+#include "i18n.h"
 
 // 対局ロジック: タップ選択→指し手確定、成り確認、持駒打ち、時計、千日手、エンジン対戦
 class Game : public QObject {
@@ -135,7 +136,8 @@ public:
     }
     bool over() const { return over_; }
     QString statusText() const { return statusText_; }
-    QString resultText() const { return resultText_; }
+    // 表示用: 英語カタログがあれば英語の終局結果 (KIF 書き出しは resultText_ の日本語原文)
+    QString resultText() const { return resultDisplay_.isEmpty() ? tx(resultText_) : resultDisplay_; }
     bool promoteAsked() const { return promoteAsked_; }
     int selectedSquare() const { return int(selSq_); }
     int selectedHand() const { return selHand_; }
@@ -195,7 +197,8 @@ private:
     QString moveTextAtPly(int ply) const;   // n手目(1始まり)を初形から再現して文言化
     QString fmtEval(const EvalRec& e) const;
     int graphVal(const EvalRec& e) const;   // グラフY値 (詰みは ±1200 でクランプ)
-    void endGame(const QString& result);
+    // display は表示専用の上書き文 (点数など動的値を含む文を翻訳するため。空なら result を翻訳)
+    void endGame(const QString& result, const QString& display = QString());
     void updateStatus();
     QString enginePathOrDefault(const QString& path, const QString& engineId) const;
     QString configureEngine(const QString& enginePath, const QString& engineId,
@@ -219,6 +222,7 @@ private:
 
     bool over_ = false;
     QString resultText_;
+    QString resultDisplay_;
     QString statusText_;
 
     qint64 clock_[2] = { 0, 0 };

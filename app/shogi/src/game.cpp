@@ -54,7 +54,7 @@ Game::Game(QObject* parent) : QObject(parent)
     connect(&engine_, &UsiEngine::bestMove, this, &Game::onBestMove);
     connect(&engine_, &UsiEngine::resigned, this, &Game::onEngineResigned);
     connect(&engine_, &UsiEngine::won, this, [this] {
-        endGame(QStringLiteral("相手が入玉勝ちを宣言"));
+        endGame(QStringLiteral("相手が入玉勝ちを宣言"));   // 表示時 tx (msgid登録済み)
     });
     connect(&engine_, &UsiEngine::thinkingChanged, this, [this] {
         emit thinkingChanged();
@@ -80,7 +80,7 @@ void Game::setupGame(int mainSec, int byomiSec)
     selSq_ = NONE; selHand_ = -1;
     targets_.clear(); promotePair_.clear(); promoteAsked_ = false;
     lastFrom_ = lastTo_ = NONE;
-    over_ = false; resultText_.clear();
+    over_ = false; resultText_.clear(); resultDisplay_.clear();
     viewPly_ = -1;
     byomiMs_ = byomiSec * 1000;
     inByomi_[0] = inByomi_[1] = mainSec <= 0 && byomiMs_ > 0;
@@ -108,7 +108,7 @@ void Game::newGameHuman(int mainSec, int byomiSec, bool study,
     if (study) {
         if (configureEngine(enginePath, engineId, threads, hashMb).isEmpty()) {
             studyMode_ = false;
-            evalMessage_ = QStringLiteral("エンジンが見つからず学習モード off");
+            evalMessage_ = tx(QStringLiteral("エンジンが見つからず学習モード off"));
             emit evalMessageChanged();
         } else {
             // MultiPVは探索種別ごとにapplyMultiPvで切替 (対局=1/検討=2)。
@@ -171,11 +171,11 @@ void Game::newGameEngine(bool humanSente, int mainSec, int byomiSec,
     if (!enginePath.isEmpty())
         engineLabel_.clear();
     else if (engineId == QStringLiteral("suisho5"))
-        engineLabel_ = QStringLiteral("水匠5");
+        engineLabel_ = tx(QStringLiteral("水匠5"));
     else if (engineId == QStringLiteral("tsuyou11"))
-        engineLabel_ = QStringLiteral("つようら王11mini");
+        engineLabel_ = tx(QStringLiteral("つようら王11mini"));
     else
-        engineLabel_ = QStringLiteral("やねうら王");
+        engineLabel_ = tx(QStringLiteral("やねうら王"));
     // MultiPVは探索種別ごとの切替 (startThink/maybeStartAnalysisでapplyMultiPv)
     engine_.newGame();
     emit modeChanged();
@@ -244,7 +244,7 @@ QString Game::saveKif()
 {
     Board start;
     if (!start.loadSfen(startSfen_.toLatin1().constData())) {
-        setKifuMessage(QStringLiteral("初局面を復元できませんでした"));
+        setKifuMessage(tx(QStringLiteral("初局面を復元できませんでした")));
         return QString();
     }
     QString sName, gName;
@@ -263,7 +263,7 @@ QString Game::saveKif()
             .arg(QDateTime::currentDateTime().toString(QStringLiteral("yyyyMMdd-HHmmss"))));
     QFile f(path);
     if (!f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-        setKifuMessage(QStringLiteral("書き込めません: ") + path);
+        setKifuMessage(tx(QStringLiteral("書き込めません: ")) + path);
         return QString();
     }
     QTextStream ts(&f);
@@ -281,7 +281,7 @@ QString Game::saveSfen()
             .arg(QDateTime::currentDateTime().toString(QStringLiteral("yyyyMMdd-HHmmss"))));
     QFile f(path);
     if (!f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-        setKifuMessage(QStringLiteral("書き込めません: ") + path);
+        setKifuMessage(tx(QStringLiteral("書き込めません: ")) + path);
         return QString();
     }
     f.write(kifu::exportSfenLine(startSfen_, usiMoves_).toUtf8());
@@ -294,7 +294,7 @@ bool Game::importKifu(const QString& path, int mainSec, int byomiSec)
 {
     QFile f(path);
     if (!f.open(QIODevice::ReadOnly)) {
-        setKifuMessage(QStringLiteral("ファイルが開けません: ") + path);
+        setKifuMessage(tx(QStringLiteral("ファイルが開けません: ")) + path);
         return false;
     }
     const QString text = QString::fromUtf8(f.readAll());
@@ -313,7 +313,7 @@ bool Game::importKifu(const QString& path, int mainSec, int byomiSec)
     // 全手を再現して合法性を確認しながら正則USI列を作る
     Board b;
     if (!b.loadSfen(p.startSfen.toLatin1().constData())) {
-        setKifuMessage(QStringLiteral("初局面を復元できません"));
+        setKifuMessage(tx(QStringLiteral("初局面を復元できません")));
         return false;
     }
     QStringList canon;
@@ -329,21 +329,21 @@ bool Game::importKifu(const QString& path, int mainSec, int byomiSec)
             const bool prom = body.size() >= 4 && body[2] == QLatin1Char('+');
             const char letter = body.at(prom ? 3 : 2).toLatin1();
             Kind k;
-            if (!kifu::letterToKind(letter, k)) { setKifuMessage(QStringLiteral("不明な駒: ") + usi); return false; }
+            if (!kifu::letterToKind(letter, k)) { setKifuMessage(tx(QStringLiteral("不明な駒: ")) + usi); return false; }
             int toSq;
-            if (!Board::parseUsiCoord(to.toStdString(), toSq)) { setKifuMessage(QStringLiteral("不正な手: ") + usi); return false; }
+            if (!Board::parseUsiCoord(to.toStdString(), toSq)) { setKifuMessage(tx(QStringLiteral("不正な手: ")) + usi); return false; }
             for (const Move& m : legal) {
                 if (!m.isDrop() && m.to == toSq && m.promote == prom
                     && pc::kind(b.at(m.from)) == k) { found = m; break; }
             }
             if (found.isNull()) {
-                setKifuMessage(QStringLiteral("第%1手を解釈できません: %2").arg(no).arg(usi));
+                setKifuMessage(tx(QStringLiteral("第%1手を解釈できません: %2")).arg(no).arg(usi));
                 return false;
             }
         } else {
             Move m;
             if (!Board::parseUsiMove(usi.toStdString(), m)) {
-                setKifuMessage(QStringLiteral("第%1手の形式が不正: %2").arg(no).arg(usi));
+                setKifuMessage(tx(QStringLiteral("第%1手の形式が不正: %2")).arg(no).arg(usi));
                 return false;
             }
             for (const Move& m2 : legal) {
@@ -356,7 +356,7 @@ bool Game::importKifu(const QString& path, int mainSec, int byomiSec)
                 }
             }
             if (found.isNull()) {
-                setKifuMessage(QStringLiteral("第%1手が不正: %2").arg(no).arg(usi));
+                setKifuMessage(tx(QStringLiteral("第%1手が不正: %2")).arg(no).arg(usi));
                 return false;
             }
         }
@@ -381,7 +381,7 @@ bool Game::importKifu(const QString& path, int mainSec, int byomiSec)
     }
     studySuspend_ = false;
     emit ended();
-    setKifuMessage(QStringLiteral("%1手 読み込みました").arg(usiMoves_.size()));
+    setKifuMessage(tx(QStringLiteral("%1手 読み込みました")).arg(usiMoves_.size()));
     emit evalCurveChanged();   // canReplay等のバインディングを手数変化後も再評価させる
     maybeStartAnalysis();
     return true;
@@ -517,7 +517,7 @@ bool Game::branchToGame(int ply, int engineMode, int mainSec, int byomiSec,
     }
     if (searchKind_ == SearchGame && engine_.thinking()) return false;
     if (engineMode >= 0 && enginePathOrDefault(enginePath, engineId).isEmpty()) {
-        evalMessage_ = QStringLiteral("USIエンジンが見つかりません。設定を確認してください");
+        evalMessage_ = tx(QStringLiteral("USIエンジンが見つかりません。設定を確認してください"));
         emit evalMessageChanged();
         return false;
     }
@@ -767,11 +767,15 @@ void Game::applyMove(const Move& m)
         const int b = board_.points(pc::other(mover));
         if (a >= 10 && b < 10) {
             endGame(QStringLiteral("入玉勝ち — ") + winText(int(pc::other(mover)))
-                    + QStringLiteral(" (%1-%2点)").arg(a).arg(b));
+                    + QStringLiteral(" (%1-%2点)").arg(a).arg(b),
+                    tx(QStringLiteral("入玉勝ち — %1 (%2-%3点)"))
+                        .arg(tx(winText(int(pc::other(mover)))))
+                        .arg(a).arg(b));
             return;
         }
         if (a < 10 && b < 10) {
-            endGame(QStringLiteral("持将棋 (引き分け, %1-%2点)").arg(a).arg(b));
+            endGame(QStringLiteral("持将棋 (引き分け, %1-%2点)").arg(a).arg(b),
+                    tx(QStringLiteral("持将棋 (引き分け, %1-%2点)")).arg(a).arg(b));
             return;
         }
     }
@@ -860,7 +864,7 @@ void Game::startReplay()
         pendingReplayStart_ = false;
         studySuspend_ = false;     // pending経路で立てていた旗を戻す
         if (usiMoves_.size() >= 2 && !engine_.ready() && searchKind_ != SearchGame) {
-            evalMessage_ = QStringLiteral("エンジンが起動していません。対局画面で学習モードをオンにして開始してください");
+            evalMessage_ = tx(QStringLiteral("エンジンが起動していません。対局画面で学習モードをオンにして開始してください"));
             emit evalMessageChanged();
         }
         return;
@@ -1010,7 +1014,7 @@ void Game::onEvalInfo(int multipv, int depth, int cp, int matePly, const QString
         if (hintSel_ == i) { hintSel_ = -1; hintFrom_ = hintTo_ = NONE; }  // 旧強調は無効化
     }
     const QString txt = QStringLiteral("%1 %2 (%3)")
-        .arg(i == 0 ? QStringLiteral("最善手") : QStringLiteral("次善手"),
+        .arg(i == 0 ? tx(QStringLiteral("最善手")) : tx(QStringLiteral("次善手")),
              usiToText(pvFirst, board_), fmtEval(e));
     if (txt != hintText_[i]) {
         hintText_[i] = txt;
@@ -1083,17 +1087,17 @@ void Game::commitEval()
         const Turn mover = pc::other(static_cast<Turn>(searchTurn_));
         QString who;
         if (engineColor_ >= 0)
-            who = int(mover) == engineColor_ ? QStringLiteral("エンジン")
-                                             : QStringLiteral("あなたの指し手");
+            who = int(mover) == engineColor_ ? tx(QStringLiteral("エンジン"))
+                                             : tx(QStringLiteral("あなたの指し手"));
         else
-            who = turnName(int(mover));
+            who = tx(turnName(int(mover)));
         QString msg = QStringLiteral("%1 %2: %3 → %4")
                           .arg(who, moveTextAtPly(p), fmtEval(before), fmtEval(e));
         if (!before.mate && !e.mate) {
             const int dm = mover == Sente ? e.cp - before.cp : before.cp - e.cp;
             if (dm != 0)
-                msg += QStringLiteral(" (%1%2点)").arg(dm > 0 ? QStringLiteral("得")
-                                                               : QStringLiteral("損")).arg(qAbs(dm));
+                msg += tx(QStringLiteral(" (%1%2点)")).arg(dm > 0 ? tx(QStringLiteral("得"))
+                                                                  : tx(QStringLiteral("損"))).arg(qAbs(dm));
         }
         evalMessage_ = msg;
         emit evalMessageChanged();
@@ -1142,7 +1146,9 @@ void Game::onBestMove(const QString& usi)
     }
     if (!ok || !board_.isLegal(m)) {
         endGame(QStringLiteral("不正な指し手(") + usi + QStringLiteral(") — ")
-                + winText(engineColor_) );
+                + winText(engineColor_),
+                tx(QStringLiteral("不正な指し手(%1) — %2"))
+                    .arg(usi, tx(winText(engineColor_))));
         return;
     }
     applyMove(m);
@@ -1156,7 +1162,7 @@ void Game::onEngineResigned()
 
 // --- 終局・表示更新 ----------------------------------------------------------
 
-void Game::endGame(const QString& result)
+void Game::endGame(const QString& result, const QString& display)
 {
     if (over_) return;
     over_ = true;
@@ -1165,6 +1171,7 @@ void Game::endGame(const QString& result)
     clearHints();
     if (engine_.thinking()) engine_.stop();
     resultText_ = result;
+    resultDisplay_ = display;
     tick_.stop();
     clearSelection();
     updateStatus();
@@ -1176,19 +1183,19 @@ void Game::updateStatus()
 {
     QString s;
     if (over_) {
-        s = resultText_;
+        s = resultText();   // 表示は翻訳済み (KIFは resultText_ 原文)
     } else {
-        s = turnName(int(board_.turn()));
+        s = tx(turnName(int(board_.turn())));
         if (engine_.thinking())
-            s += searchKind_ == SearchAnalysis ? QStringLiteral(" を検討中…")
-                                               : QStringLiteral(" が思考中…");
+            s += searchKind_ == SearchAnalysis ? tx(QStringLiteral(" を検討中…"))
+                                               : tx(QStringLiteral(" が思考中…"));
         else
-            s += QStringLiteral("の番");
-        if (board_.inCheck(board_.turn())) s += QStringLiteral("(王手!)");
+            s += tx(QStringLiteral("の番"));
+        if (board_.inCheck(board_.turn())) s += tx(QStringLiteral("(王手!)"));
         if (engineColor_ >= 0)
             s += QStringLiteral("  [%1]").arg(!engineLabel_.isEmpty() ? engineLabel_
                                        : engine_.ready() ? engine_.engineName()
-                                                         : QStringLiteral("エンジン起動中…"));
+                                                         : tx(QStringLiteral("エンジン起動中…")));
     }
     if (s != statusText_) {
         statusText_ = s;
@@ -1228,8 +1235,8 @@ void Game::onTick()
 
 QString Game::fmtEval(const EvalRec& e) const
 {
-    if (e.mate > 0) return QStringLiteral("+詰%1").arg(e.mate);
-    if (e.mate < 0) return QStringLiteral("-詰%1").arg(-e.mate);
+    if (e.mate > 0) return tx(QStringLiteral("+詰%1")).arg(e.mate);
+    if (e.mate < 0) return tx(QStringLiteral("-詰%1")).arg(-e.mate);
     return (e.cp > 0 ? QStringLiteral("+") : QString()) + QString::number(e.cp);
 }
 

@@ -1,5 +1,27 @@
 # 変更履歴
 
+## 2026-11-26 — v1.0.3: システム言語に追従するUI (日本語 / English)
+
+- OSの言語設定が日本語のときは日本語、それ以外のときは英語のUIになった
+  (Lomiri i18n.tr / C++ ともに gettext カタログ `po/en.po` 経由)。
+- 実装: main.cpp でシステム言語が日本語以外なら `LANGUAGE=en` を設定し、
+  `$PREFIX/share/locale` に `bindtextdomain("shogi.ow", …)`。QML の i18n.tr は
+  LomiriI18n が glibc gettext を介するため同じカタログで翻訳される。
+  C++ の状態表示・終局結果・棋譜メッセージは `tx()` ヘルパーでラップ
+  (`src/i18n.h`)。KIF書き出し内容と指し手表記 (☗7六歩 等) は言語設定に関係なく日本語のまま。
+- CMake は既存の po/ 基盤で `po/en.po` をコンパイルして
+  `share/locale/en/LC_MESSAGES/shogi.ow.mo` として同梱。
+- デスクトップファイルのアプリ名も英環境では "Shogi" になる (Name[en])。
+- QML の見逃し分 (時計行の先手/後手・N手目、持ち駒ラベル、音/消ボタン、
+  時間換算ヒント、グラフの「評価データがありません」) も i18n.tr 化。
+- 英語でのエンジン表示名を YaneuraOu / Suisho5 / **TsuyouraOu 11** に
+  (「Tsuyoura King」より TsuyouraOu が自然という検証時フィードバック対応)。
+- 盤面・駒・棋譜 notation (☗7六歩 等) と KIF/SFEN ファイル内容は言語設定に
+  係らず日本語のまま (将棋の表記として国際的にも通用するため)。
+- scripts/gen_en_po.py: QML/C++ から原文抽出 → 翻訳表突合 → po/en.po 生成
+  (翻訳漏れ・翻訳表余りをCI的に弾く)。scripts/run_tests.sh: テスト3種+
+  msgfmt+カタログ実挙動 (en で英字列、ja で原文) を docker で一括実行。
+
 ## 2026-11-25 — v1.0.2: 棋譜取り込み後の評価値グラフ再生成
 
 - KIF/SFENから取り込んだ棋譜 (およびアプリ再起動後) は評価値が未記録だったため、

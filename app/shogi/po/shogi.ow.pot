@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: shogi.ow\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-25 14:10+0000\n"
+"POT-Creation-Date: 2026-11-26 01:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,18 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: ../qml/HandRow.qml:25
+msgid "の持ち駒"
+msgstr ""
+
+#: ../qml/HandRow.qml:25
+msgid "先手"
+msgstr ""
+
+#: ../qml/HandRow.qml:25
+msgid "後手"
+msgstr ""
 
 #: ../qml/Main.qml:52 shogi.desktop.in.h:1
 msgid "将棋"
@@ -41,8 +53,28 @@ msgstr ""
 msgid "グラフ"
 msgstr ""
 
+#: ../qml/Main.qml:105
+msgid "消"
+msgstr ""
+
+#: ../qml/Main.qml:105
+msgid "音"
+msgstr ""
+
+#: ../qml/Main.qml:119 ../qml/Main.qml:144
+msgid "先手 "
+msgstr ""
+
+#: ../qml/Main.qml:119 ../qml/Main.qml:144
+msgid "後手 "
+msgstr ""
+
 #: ../qml/Main.qml:127
-msgid "手目閲覧"
+msgid "%1手目"
+msgstr ""
+
+#: ../qml/Main.qml:127
+msgid "%1手目閲覧"
 msgstr ""
 
 #: ../qml/Main.qml:157
@@ -121,6 +153,14 @@ msgstr ""
 msgid "持時間(分)"
 msgstr ""
 
+#: ../qml/Main.qml:518
+msgid "時間"
+msgstr ""
+
+#: ../qml/Main.qml:519
+msgid "分"
+msgstr ""
+
 #: ../qml/Main.qml:525
 msgid "秒読み"
 msgstr ""
@@ -181,6 +221,10 @@ msgstr ""
 msgid ""
 "左=初手 → 右=終局。上=先手有利。目盛は300点刻みの駒得 (詰みは上限で截み)。グ"
 "ラフをタップで手目の詳細"
+msgstr ""
+
+#: ../qml/Main.qml:690
+msgid "評価データがありません"
 msgstr ""
 
 #: ../qml/Main.qml:764

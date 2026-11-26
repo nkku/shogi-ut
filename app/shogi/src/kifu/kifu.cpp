@@ -1,5 +1,6 @@
 #include "kifu.h"
 #include "../shogi/types.h"
+#include "../i18n.h"
 #include <QChar>
 #include <QRegularExpression>
 #include <QTextStream>
@@ -182,7 +183,7 @@ Parsed importKif(const QString& text)
             if (line.contains(QStringLiteral("手数"))) { inMoves = true; continue; }
             if (line.startsWith(QStringLiteral("手合割"))) {
                 if (!line.contains(QStringLiteral("平手"))) {
-                    r.error = QStringLiteral("平手以外の駒落ちには対応していません");
+                    r.error = tx(QStringLiteral("平手以外の駒落ちには対応していません"));
                     return r;
                 }
             }
@@ -223,7 +224,7 @@ Parsed importKif(const QString& text)
             int rank = rest.size() > 1 ? rankOf(rest[1]) : -1;
             if (file < 1 || file > 9 || rank < 1 || rank > 9) {
                 if (!r.usi.isEmpty()) break;   // 終端側のゴミ行: ここまでで読む
-                r.error = QStringLiteral("%1行目を解析できません: %2").arg(lineNo).arg(body);
+                r.error = tx(QStringLiteral("%1行目を解析できません: %2")).arg(lineNo).arg(body);
                 return r;
             }
             toUsi = QString(QChar('0' + file)) + QChar('a' + rank - 1);
@@ -231,7 +232,7 @@ Parsed importKif(const QString& text)
             if (rest.startsWith(QStringLiteral("同"))) rest = rest.mid(1); // "２二同銀(71)"
         }
         if (same) {
-            if (prevTo < 0) { r.error = QStringLiteral("先頭に『同』があります"); return r; }
+            if (prevTo < 0) { r.error = tx(QStringLiteral("先頭に『同』があります")); return r; }
             toUsi = QString::fromStdString(Board::usiCoord(prevTo));
         }
 
@@ -239,7 +240,7 @@ Parsed importKif(const QString& text)
         int consumed = 0;
         if (!pieceOf(rest, letter, consumed)) {
             if (!r.usi.isEmpty()) break;       // 終端側のゴミ行: ここまでで読む
-            r.error = QStringLiteral("%1行目の駒が判別できません: %2").arg(lineNo).arg(body);
+            r.error = tx(QStringLiteral("%1行目の駒が判別できません: %2")).arg(lineNo).arg(body);
             return r;
         }
         rest = rest.mid(consumed);
@@ -277,7 +278,7 @@ Parsed importKif(const QString& text)
         if (Board::parseUsiCoord(toUsi.toStdString(), toSq)) prevTo = toSq;
     }
     if (r.usi.isEmpty() && r.endText.isEmpty()) {
-        r.error = QStringLiteral("指し手がありませんでした");
+        r.error = tx(QStringLiteral("指し手がありませんでした"));
         return r;
     }
     r.ok = true;
@@ -298,7 +299,7 @@ Parsed importSfenLine(const QString& text)
     if (s.startsWith(QStringLiteral("sfen "), Qt::CaseInsensitive)) s = s.mid(5);
     if (s.startsWith(QStringLiteral("position "), Qt::CaseInsensitive)) s = s.mid(9);
     const QStringList toks = s.split(QLatin1Char(' '), Qt::SkipEmptyParts);
-    if (toks.size() < 4) { r.error = QStringLiteral("SFENが壊れています"); return r; }
+    if (toks.size() < 4) { r.error = tx(QStringLiteral("SFENが壊れています")); return r; }
     r.startSfen = QStringList(toks.mid(0, 4)).join(QLatin1Char(' '));
     int i = 4;
     if (i < toks.size() && toks[i].compare(QStringLiteral("moves"), Qt::CaseInsensitive) == 0) {

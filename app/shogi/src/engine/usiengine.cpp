@@ -1,4 +1,5 @@
 #include "usiengine.h"
+#include "../i18n.h"
 #include <QCoreApplication>
 #include <QFileInfo>
 #include <QTextStream>
@@ -9,7 +10,7 @@ UsiEngine::UsiEngine(QObject* parent) : QObject(parent)
     connect(&proc_, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
             this, &UsiEngine::onFinished);
     connect(&proc_, &QProcess::errorOccurred, this, [this](QProcess::ProcessError e) {
-        emit logLine(QStringLiteral("プロセスエラー: %1 (%2)")
+        emit logLine(tx(QStringLiteral("プロセスエラー: %1 (%2)"))
                          .arg(int(e)).arg(proc_.errorString()));
     });
 }
@@ -42,7 +43,7 @@ void UsiEngine::start(const QString& program, const QStringList& args)
         proc_.setWorkingDirectory(fi.absolutePath());
     proc_.start(program, args);
     if (!proc_.waitForStarted(5000)) {
-        emit logLine(QStringLiteral("起動失敗: %1").arg(program));
+        emit logLine(tx(QStringLiteral("起動失敗: %1")).arg(program));
         return;
     }
     emit runningChanged();
